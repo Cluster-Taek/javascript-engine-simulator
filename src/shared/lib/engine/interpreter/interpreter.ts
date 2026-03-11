@@ -91,24 +91,69 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     };
   }
 
-  function hoistVars(body: readonly Statement[], env: Environment): void {
+  /** Recursively collect all var declarations from nested blocks */
+  function collectVarDeclarations(body: readonly Statement[], result: string[]): void {
     for (const stmt of body) {
       if (stmt.type === 'VariableDeclaration' && stmt.kind === 'var') {
         for (const decl of stmt.declarations) {
-          if (!env.has(decl.id.name)) {
-            env.declare(decl.id.name, 'var', { kind: 'undefined' });
+          result.push(decl.id.name);
+        }
+      } else if (stmt.type === 'BlockStatement') {
+        collectVarDeclarations(stmt.body, result);
+      } else if (stmt.type === 'IfStatement') {
+        collectVarDeclarations(stmt.consequent.body, result);
+        if (stmt.alternate) {
+          if (stmt.alternate.type === 'IfStatement') {
+            collectVarDeclarations([stmt.alternate], result);
+          } else {
+            collectVarDeclarations(stmt.alternate.body, result);
           }
         }
-      } else if (stmt.type === 'FunctionDeclaration') {
-        // function hoisting - handled in block execution
+      } else if (stmt.type === 'WhileStatement') {
+        collectVarDeclarations(stmt.body.body, result);
+      } else if (stmt.type === 'ForStatement') {
+        if (stmt.init && stmt.init.type === 'VariableDeclaration' && stmt.init.kind === 'var') {
+          for (const decl of stmt.init.declarations) {
+            result.push(decl.id.name);
+          }
+        }
+        collectVarDeclarations(stmt.body.body, result);
+      } else if (stmt.type === 'TryStatement') {
+        collectVarDeclarations(stmt.block.body, result);
+        if (stmt.handler) {
+          collectVarDeclarations(stmt.handler.body.body, result);
+        }
+        if (stmt.finalizer) {
+          collectVarDeclarations(stmt.finalizer.body, result);
+        }
+      }
+    }
+  }
+
+  function hoistVars(body: readonly Statement[], env: Environment): void {
+    const varNames: string[] = [];
+    collectVarDeclarations(body, varNames);
+    for (const name of varNames) {
+      env.declareVarIfAbsent(name);
+    }
+  }
+
+  /** Pre-declare let/const as TDZ in current block (not recursive - block-scoped) */
+  function hoistLetConst(body: readonly Statement[], env: Environment): void {
+    for (const stmt of body) {
+      if (stmt.type === 'VariableDeclaration' && (stmt.kind === 'let' || stmt.kind === 'const')) {
+        for (const decl of stmt.declarations) {
+          env.declareTDZ(decl.id.name, stmt.kind);
+        }
       }
     }
   }
 
   function* executeBlock(body: readonly Statement[], env: Environment): Generator<StepResult, RuntimeValue, void> {
     hoistVars(body, env);
+    hoistLetConst(body, env);
 
-    // Hoist function declarations first
+    // Hoist function declarations first (var-like semantics)
     for (const stmt of body) {
       if (stmt.type === 'FunctionDeclaration') {
         const fnVal: RuntimeValue = {
@@ -119,7 +164,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
           closure: env,
           async: stmt.async,
         };
-        env.declare(stmt.id.name, 'let', fnVal);
+        env.declare(stmt.id.name, 'var', fnVal);
       }
     }
 
@@ -185,7 +230,11 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         }
       }
       if (stmt.kind !== 'var') {
-        env.declare(decl.id.name, stmt.kind, value);
+        if (env.hasOwn(decl.id.name)) {
+          env.initialize(decl.id.name, value);
+        } else {
+          env.declare(decl.id.name, stmt.kind, value);
+        }
       } else {
         env.assign(decl.id.name, value);
       }

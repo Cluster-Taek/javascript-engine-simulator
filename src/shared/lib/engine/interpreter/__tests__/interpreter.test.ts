@@ -149,4 +149,119 @@ describe('interpreter', () => {
     const assignStep = steps.find((s) => s.kind === 'variable-assign' && s.description.includes('+='));
     expect(assignStep?.value).toEqual({ kind: 'number', value: 8 });
   });
+
+  // --- Hoisting tests ---
+
+  it('hoists var from nested if block to function scope', () => {
+    const { console: output } = run(`
+      function test() {
+        console.log(x);
+        if (true) {
+          var x = 10;
+        }
+        console.log(x);
+      }
+      test();
+    `);
+    expect(output[0]).toBe('undefined');
+    expect(output[1]).toBe('10');
+  });
+
+  it('hoists var from nested while block', () => {
+    const { console: output } = run(`
+      function test() {
+        console.log(x);
+        while (false) {
+          var x = 5;
+        }
+        console.log(x);
+      }
+      test();
+    `);
+    expect(output[0]).toBe('undefined');
+    expect(output[1]).toBe('undefined');
+  });
+
+  it('hoists var from for loop init', () => {
+    const { console: output } = run(`
+      function test() {
+        console.log(i);
+        for (var i = 0; i < 3; i++) {}
+        console.log(i);
+      }
+      test();
+    `);
+    expect(output[0]).toBe('undefined');
+    expect(output[1]).toBe('3');
+  });
+
+  it('hoists var from try/catch block', () => {
+    const { console: output } = run(`
+      function test() {
+        console.log(x);
+        try {
+          var x = 42;
+        } catch (e) {}
+        console.log(x);
+      }
+      test();
+    `);
+    expect(output[0]).toBe('undefined');
+    expect(output[1]).toBe('42');
+  });
+
+  it('var in function shadows outer var', () => {
+    const { console: output } = run(`
+      var x = 10;
+      function test() {
+        console.log(x);
+        var x = 20;
+        console.log(x);
+      }
+      test();
+      console.log(x);
+    `);
+    expect(output[0]).toBe('undefined');
+    expect(output[1]).toBe('20');
+    expect(output[2]).toBe('10');
+  });
+
+  it('hoists function declarations fully', () => {
+    const { console: output } = run(`
+      console.log(greet());
+      function greet() { return "hello"; }
+    `);
+    expect(output[0]).toBe('hello');
+  });
+
+  it('throws TDZ error when accessing let before declaration', () => {
+    expect(() =>
+      run(`
+      console.log(x);
+      let x = 5;
+    `)
+    ).toThrow("Cannot access 'x' before initialization");
+  });
+
+  it('throws TDZ error when accessing const before declaration', () => {
+    expect(() =>
+      run(`
+      console.log(y);
+      const y = 10;
+    `)
+    ).toThrow("Cannot access 'y' before initialization");
+  });
+
+  it('var hoisting works in new constructor', () => {
+    const { console: output } = run(`
+      function MyClass(val) {
+        console.log(x);
+        var x = val;
+        console.log(x);
+      }
+      new MyClass(42);
+    `);
+    expect(output[0]).toBe('undefined');
+    expect(output[1]).toBe('42');
+  });
 });
