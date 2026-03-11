@@ -11,9 +11,13 @@ import {
   type ForStatement,
   type BlockStatement,
   type ExpressionStatement,
+  type TryStatement,
+  type CatchClause,
+  type ThrowStatement,
   type BinaryExpression,
   type LogicalExpression,
   type UnaryExpression,
+  type ConditionalExpression,
   type AssignmentExpression,
   type UpdateExpression,
   type CallExpression,
@@ -154,6 +158,12 @@ export function parse(tokens: Token[]): Program {
     }
     if (tok.type === 'For') {
       return parseForStatement();
+    }
+    if (tok.type === 'Try') {
+      return parseTryStatement();
+    }
+    if (tok.type === 'Throw') {
+      return parseThrowStatement();
     }
     if (tok.type === 'OpenBrace') {
       return parseBlockStatement();
@@ -321,6 +331,60 @@ export function parse(tokens: Token[]): Program {
     };
   }
 
+  function parseTryStatement(): TryStatement {
+    const start = peek();
+    expect('Try');
+    const block = parseBlockStatement();
+    let handler: CatchClause | null = null;
+    let finalizer: BlockStatement | null = null;
+
+    if (check('Catch')) {
+      const catchStart = peek();
+      advance();
+      let param: Identifier | null = null;
+      if (check('OpenParen')) {
+        advance();
+        param = parseIdentifier();
+        expect('CloseParen');
+      }
+      const body = parseBlockStatement();
+      handler = {
+        type: 'CatchClause',
+        param,
+        body,
+        loc: loc({ line: catchStart.line, column: catchStart.column }),
+      };
+    }
+
+    if (match('Finally')) {
+      finalizer = parseBlockStatement();
+    }
+
+    if (handler === null && finalizer === null) {
+      throw new ParseError("Missing catch or finally after try");
+    }
+
+    return {
+      type: 'TryStatement',
+      block,
+      handler,
+      finalizer,
+      loc: loc({ line: start.line, column: start.column }),
+    };
+  }
+
+  function parseThrowStatement(): ThrowStatement {
+    const start = peek();
+    expect('Throw');
+    const argument = parseExpression();
+    match('Semicolon');
+    return {
+      type: 'ThrowStatement',
+      argument,
+      loc: loc({ line: start.line, column: start.column }),
+    };
+  }
+
   function parseExpressionStatement(): ExpressionStatement {
     const start = peek();
     const expression = parseExpression();
@@ -336,8 +400,29 @@ export function parse(tokens: Token[]): Program {
     return parseAssignment();
   }
 
+  function parseTernary(): Expression {
+    const expr = parseBinary(0);
+
+    if (check('Question')) {
+      advance();
+      const consequent = parseAssignment();
+      expect('Colon');
+      const alternate = parseAssignment();
+      const result: ConditionalExpression = {
+        type: 'ConditionalExpression',
+        test: expr,
+        consequent,
+        alternate,
+        loc: expr.loc,
+      };
+      return result;
+    }
+
+    return expr;
+  }
+
   function parseAssignment(): Expression {
-    const left = parseBinary(0);
+    const left = parseTernary();
 
     const tok = peek();
     if (tok.type === 'Equals' || tok.type === 'PlusEquals' || tok.type === 'MinusEquals') {

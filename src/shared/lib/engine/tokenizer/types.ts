@@ -16,6 +16,10 @@ export type TokenType =
   | 'Null'
   | 'Undefined'
   | 'New'
+  | 'Try'
+  | 'Catch'
+  | 'Finally'
+  | 'Throw'
   | 'Plus'
   | 'Minus'
   | 'Star'
@@ -48,6 +52,7 @@ export type TokenType =
   | 'Colon'
   | 'Comma'
   | 'Dot'
+  | 'Question'
   | 'Async'
   | 'Await'
   | 'EOF';
@@ -74,6 +79,10 @@ export const KEYWORDS: Record<string, TokenType> = {
   null: 'Null',
   undefined: 'Undefined',
   new: 'New',
+  try: 'Try',
+  catch: 'Catch',
+  finally: 'Finally',
+  throw: 'Throw',
   async: 'Async',
   await: 'Await',
 };

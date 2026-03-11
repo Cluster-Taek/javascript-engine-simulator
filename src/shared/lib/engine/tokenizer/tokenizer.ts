@@ -268,6 +268,9 @@ export function tokenize(source: string): Token[] {
       case '.':
         addToken('Dot', '.', tokenLine, tokenColumn);
         break;
+      case '?':
+        addToken('Question', '?', tokenLine, tokenColumn);
+        break;
       // ignore unknown characters
     }
   }

@@ -15,4 +15,4 @@ export type {
   AsyncRuntimeSnapshot,
   EventLoopPhase,
 } from './types';
-export { EngineError, ParseError, RuntimeError, ReturnSignal, BreakSignal, ContinueSignal } from './types';
+export { EngineError, ParseError, RuntimeError, ReturnSignal, BreakSignal, ContinueSignal, ThrowSignal } from './types';

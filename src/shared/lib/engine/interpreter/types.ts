@@ -170,7 +170,11 @@ export type StepKind =
   | 'promise-resolve'
   | 'promise-create'
   | 'await-suspend'
-  | 'web-api-tick';
+  | 'web-api-tick'
+  | 'try-enter'
+  | 'catch-enter'
+  | 'finally-enter'
+  | 'throw';
 
 export interface StepResult {
   readonly id: string;
@@ -216,6 +220,10 @@ export class ReturnSignal {
 export class BreakSignal {}
 
 export class ContinueSignal {}
+
+export class ThrowSignal {
+  constructor(public readonly value: RuntimeValue) {}
+}
 
 export class AwaitSignal {
   public variableName?: string;

@@ -1,5 +1,5 @@
 import { Environment, runtimeValueToString } from './environment';
-import { RuntimeError, ReturnSignal, BreakSignal, ContinueSignal, AwaitSignal } from './types';
+import { RuntimeError, ReturnSignal, BreakSignal, ContinueSignal, AwaitSignal, ThrowSignal } from './types';
 import { type RuntimeValue, type StepResult, type StackFrame, type FunctionValue, type PromiseValue } from './types';
 import {
   type Program,
@@ -13,9 +13,12 @@ import {
   type ForStatement,
   type BlockStatement,
   type ExpressionStatement,
+  type TryStatement,
+  type ThrowStatement,
   type BinaryExpression,
   type LogicalExpression,
   type UnaryExpression,
+  type ConditionalExpression,
   type AssignmentExpression,
   type UpdateExpression,
   type CallExpression,
@@ -156,6 +159,10 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         return yield* executeBlock(stmt.body, new Environment('block', env));
       case 'ExpressionStatement':
         return yield* executeExpressionStatement(stmt, env);
+      case 'TryStatement':
+        return yield* executeTryStatement(stmt, env);
+      case 'ThrowStatement':
+        return yield* executeThrowStatement(stmt, env);
     }
   }
 
@@ -304,6 +311,64 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     return value;
   }
 
+  function* executeTryStatement(stmt: TryStatement, env: Environment): Generator<StepResult, RuntimeValue, void> {
+    yield createStep('try-enter', 'Entering try block', env, stmt);
+
+    let result: RuntimeValue = { kind: 'undefined' };
+    let caughtError: RuntimeValue | null = null;
+
+    try {
+      result = yield* executeBlock(stmt.block.body, new Environment('try', env));
+    } catch (e) {
+      if (e instanceof ThrowSignal) {
+        caughtError = e.value;
+      } else if (e instanceof RuntimeError) {
+        caughtError = { kind: 'string', value: e.message };
+      } else if (
+        e instanceof ReturnSignal ||
+        e instanceof BreakSignal ||
+        e instanceof ContinueSignal ||
+        e instanceof AwaitSignal
+      ) {
+        if (stmt.finalizer) {
+          yield createStep('finally-enter', 'Entering finally block', env, stmt);
+          yield* executeBlock(stmt.finalizer.body, new Environment('finally', env));
+        }
+        throw e;
+      } else {
+        throw e;
+      }
+    }
+
+    if (caughtError !== null && stmt.handler !== null) {
+      const catchEnv = new Environment('catch', env);
+      if (stmt.handler.param) {
+        catchEnv.declare(stmt.handler.param.name, 'let', caughtError);
+      }
+      yield createStep('catch-enter', `Caught: ${runtimeValueToString(caughtError)}`, catchEnv, stmt.handler);
+      result = yield* executeBlock(stmt.handler.body.body, catchEnv);
+    } else if (caughtError !== null) {
+      if (stmt.finalizer) {
+        yield createStep('finally-enter', 'Entering finally block', env, stmt);
+        yield* executeBlock(stmt.finalizer.body, new Environment('finally', env));
+      }
+      throw new ThrowSignal(caughtError);
+    }
+
+    if (stmt.finalizer) {
+      yield createStep('finally-enter', 'Entering finally block', env, stmt);
+      yield* executeBlock(stmt.finalizer.body, new Environment('finally', env));
+    }
+
+    return result;
+  }
+
+  function* executeThrowStatement(stmt: ThrowStatement, env: Environment): Generator<StepResult, RuntimeValue, void> {
+    const value = yield* evaluateExpression(stmt.argument, env);
+    yield createStep('throw', `throw ${runtimeValueToString(value)}`, env, stmt, value);
+    throw new ThrowSignal(value);
+  }
+
   function* evaluateExpression(expr: Expression, env: Environment): Generator<StepResult, RuntimeValue, void> {
     switch (expr.type) {
       case 'NumericLiteral':
@@ -340,6 +405,22 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         return yield* evaluateCallExpression(expr, env);
       case 'MemberExpression':
         return yield* evaluateMemberExpression(expr, env);
+      case 'ConditionalExpression': {
+        const condExpr = expr as ConditionalExpression;
+        const testVal = yield* evaluateExpression(condExpr.test, env);
+        yield createStep(
+          'condition-test',
+          `ternary: ${runtimeValueToString(testVal)} → ${isTruthy(testVal) ? 'consequent' : 'alternate'}`,
+          env,
+          expr,
+          testVal
+        );
+        if (isTruthy(testVal)) {
+          return yield* evaluateExpression(condExpr.consequent, env);
+        }
+        return yield* evaluateExpression(condExpr.alternate, env);
+      }
+
       case 'AwaitExpression': {
         const awaitedValue = yield* evaluateExpression((expr as AwaitExpression).argument, env);
         if (awaitedValue.kind === 'promise') {
@@ -897,6 +978,8 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
   } catch (e) {
     if (e instanceof ReturnSignal) {
       lastValue = e.value;
+    } else if (e instanceof ThrowSignal) {
+      throw new RuntimeError(`Uncaught: ${runtimeValueToString(e.value)}`);
     } else {
       throw e;
     }

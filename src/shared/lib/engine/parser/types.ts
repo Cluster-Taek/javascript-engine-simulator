@@ -68,6 +68,24 @@ export interface ExpressionStatement extends BaseNode {
   readonly expression: Expression;
 }
 
+export interface TryStatement extends BaseNode {
+  readonly type: 'TryStatement';
+  readonly block: BlockStatement;
+  readonly handler: CatchClause | null;
+  readonly finalizer: BlockStatement | null;
+}
+
+export interface CatchClause extends BaseNode {
+  readonly type: 'CatchClause';
+  readonly param: Identifier | null;
+  readonly body: BlockStatement;
+}
+
+export interface ThrowStatement extends BaseNode {
+  readonly type: 'ThrowStatement';
+  readonly argument: Expression;
+}
+
 export interface BinaryExpression extends BaseNode {
   readonly type: 'BinaryExpression';
   readonly operator: string;
@@ -166,6 +184,13 @@ export interface ArrowFunctionExpression extends BaseNode {
   readonly async?: boolean;
 }
 
+export interface ConditionalExpression extends BaseNode {
+  readonly type: 'ConditionalExpression';
+  readonly test: Expression;
+  readonly consequent: Expression;
+  readonly alternate: Expression;
+}
+
 export interface AwaitExpression extends BaseNode {
   readonly type: 'AwaitExpression';
   readonly argument: Expression;
@@ -185,7 +210,9 @@ export type Statement =
   | WhileStatement
   | ForStatement
   | BlockStatement
-  | ExpressionStatement;
+  | ExpressionStatement
+  | TryStatement
+  | ThrowStatement;
 
 export type Expression =
   | BinaryExpression
@@ -206,6 +233,7 @@ export type Expression =
   | FunctionDeclaration
   | ArrowFunctionExpression
   | NewExpression
+  | ConditionalExpression
   | AwaitExpression;
 
-export type AstNode = Program | Statement | Expression | VariableDeclarator | ObjectProperty;
+export type AstNode = Program | Statement | Expression | VariableDeclarator | ObjectProperty | CatchClause;

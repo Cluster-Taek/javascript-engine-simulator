@@ -126,6 +126,45 @@ console.log("name:", obj.name);
 `,
   },
   {
+    name: 'Try/Catch',
+    code: `function divide(a, b) {
+  if (b === 0) {
+    throw "Division by zero";
+  }
+  return a / b;
+}
+
+try {
+  let result = divide(10, 2);
+  console.log("10 / 2 =", result);
+  let bad = divide(5, 0);
+  console.log("never reached");
+} catch (e) {
+  console.log("caught:", e);
+} finally {
+  console.log("cleanup done");
+}
+`,
+  },
+  {
+    name: 'Ternary Operator',
+    code: `function abs(n) {
+  return n >= 0 ? n : -n;
+}
+
+let x = -7;
+let result = abs(x);
+console.log("abs:", result);
+
+let grade = result > 5 ? "high" : "low";
+console.log("grade:", grade);
+
+// nested ternary
+let label = x > 0 ? "positive" : x < 0 ? "negative" : "zero";
+console.log("label:", label);
+`,
+  },
+  {
     name: 'setTimeout Demo',
     code: `console.log("start");
 
