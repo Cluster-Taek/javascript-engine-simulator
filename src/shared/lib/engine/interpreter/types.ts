@@ -106,6 +106,7 @@ export interface BindingSnapshot {
   readonly valueNode: ValueNode;
   readonly kind: 'var' | 'let' | 'const';
   readonly mutable: boolean;
+  readonly initialized: boolean;
 }
 
 export interface EnvironmentSnapshot {
@@ -151,6 +152,7 @@ export interface AsyncRuntimeSnapshot {
 
 export type StepKind =
   | 'enter-statement'
+  | 'hoisting'
   | 'variable-declare'
   | 'variable-assign'
   | 'enter-function'
