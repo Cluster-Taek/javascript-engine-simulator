@@ -19,19 +19,53 @@ export class Environment {
     if (kind === 'var') {
       // var hoisting: declare in function scope or global
       const fnEnv = this.findFunctionScope();
-      fnEnv.bindings.set(name, { value, mutable: true, kind });
+      fnEnv.bindings.set(name, { value, mutable: true, kind, initialized: true });
     } else {
-      this.bindings.set(name, { value, mutable: kind !== 'const', kind });
+      this.bindings.set(name, { value, mutable: kind !== 'const', kind, initialized: true });
     }
   }
 
+  /** Pre-declare a var in function scope only if it doesn't already exist there */
+  declareVarIfAbsent(name: string): void {
+    const fnEnv = this.findFunctionScope();
+    if (!fnEnv.bindings.has(name)) {
+      fnEnv.bindings.set(name, { value: { kind: 'undefined' }, mutable: true, kind: 'var', initialized: true });
+    }
+  }
+
+  /** Pre-declare let/const as uninitialized (TDZ) */
+  declareTDZ(name: string, kind: 'let' | 'const'): void {
+    this.bindings.set(name, {
+      value: { kind: 'undefined' },
+      mutable: kind !== 'const',
+      kind,
+      initialized: false,
+    });
+  }
+
+  /** Initialize a TDZ binding when its declaration is reached */
+  initialize(name: string, value: RuntimeValue): void {
+    const binding = this.bindings.get(name);
+    if (binding !== undefined) {
+      binding.value = value;
+      binding.initialized = true;
+      return;
+    }
+    throw new RuntimeError(`ReferenceError: '${name}' is not defined`);
+  }
+
   declareBuiltin(name: string, value: RuntimeValue): void {
-    this.bindings.set(name, { value, mutable: false, kind: 'const', builtin: true });
+    this.bindings.set(name, { value, mutable: false, kind: 'const', builtin: true, initialized: true });
   }
 
   resolve(name: string): RuntimeValue {
     const binding = this.bindings.get(name);
-    if (binding !== undefined) return binding.value;
+    if (binding !== undefined) {
+      if (!binding.initialized) {
+        throw new RuntimeError(`ReferenceError: Cannot access '${name}' before initialization`);
+      }
+      return binding.value;
+    }
     if (this.parent !== null) return this.parent.resolve(name);
     throw new RuntimeError(`ReferenceError: '${name}' is not defined`);
   }
@@ -39,6 +73,9 @@ export class Environment {
   assign(name: string, value: RuntimeValue): void {
     const binding = this.bindings.get(name);
     if (binding !== undefined) {
+      if (!binding.initialized) {
+        throw new RuntimeError(`ReferenceError: Cannot access '${name}' before initialization`);
+      }
       if (!binding.mutable) {
         throw new RuntimeError(`TypeError: Assignment to constant variable '${name}'`);
       }
@@ -55,6 +92,11 @@ export class Environment {
   has(name: string): boolean {
     if (this.bindings.has(name)) return true;
     return this.parent?.has(name) ?? false;
+  }
+
+  /** Check if a binding exists in this scope only (not parent) */
+  hasOwn(name: string): boolean {
+    return this.bindings.has(name);
   }
 
   snapshot(): EnvironmentSnapshot {
@@ -84,7 +126,7 @@ export class Environment {
   }
 
   private findFunctionScope(): Environment {
-    if (this.label.startsWith('function:') || this.label === 'global') return this;
+    if (this.label.startsWith('function:') || this.label.startsWith('new:') || this.label === 'global') return this;
     return this.parent?.findFunctionScope() ?? this;
   }
 

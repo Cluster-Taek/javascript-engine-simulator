@@ -91,6 +91,7 @@ export interface Binding {
   readonly mutable: boolean;
   readonly kind: 'var' | 'let' | 'const';
   readonly builtin?: boolean;
+  initialized: boolean;
 }
 
 export type ValueNode =
