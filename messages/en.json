@@ -6,7 +6,8 @@
   "dashboard": {
     "title": "JavaScript Engine Simulator",
     "subtitle": "Tokenizer → Parser → Interpreter · Step-by-Step Visualizer",
-    "helpAriaLabel": "Help"
+    "helpAriaLabel": "Help",
+    "goToEventSimulator": "Event Simulator"
   },
   "panels": {
     "codeEditor": "Code Editor",
@@ -93,5 +94,62 @@
     "label": "Language",
     "en": "English",
     "ko": "한국어"
+  },
+  "eventDashboard": {
+    "title": "Event Propagation Simulator",
+    "subtitle": "Capturing → Target → Bubbling · Step-by-Step Visualizer",
+    "backToEngine": "← JS Engine",
+    "helpAriaLabel": "Help",
+    "codeSnippet": "JavaScript",
+    "htmlStructure": "DOM Preview",
+    "listeners": "Event Listeners",
+    "propagationPath": "Propagation Path",
+    "console": "Console",
+    "consoleEmpty": "Console output will appear here.",
+    "selectScenarioHint": "Select a scenario to begin."
+  },
+  "eventControls": {
+    "scenario": "Scenario:",
+    "selectScenario": "Select scenario...",
+    "pause": "⏸ Pause",
+    "run": "▶ Run",
+    "stepBack": "Back",
+    "step": "Step",
+    "reset": "Reset",
+    "speed": "Speed:",
+    "msPerStep": "ms/step"
+  },
+  "eventHelp": {
+    "title": "Event Propagation Simulator — Help",
+    "about": {
+      "heading": "About",
+      "description": "This simulator visualizes how DOM events propagate through the Capturing → Target → Bubbling phases, step by step."
+    },
+    "phases": {
+      "heading": "Event Phases",
+      "capturing": "Capturing",
+      "capturingDesc": "Event travels from window down to the target's parent.",
+      "target": "Target",
+      "targetDesc": "Event reaches the target element. All listeners fire regardless of useCapture.",
+      "bubbling": "Bubbling",
+      "bubblingDesc": "Event bubbles from target's parent back up to window."
+    },
+    "concepts": {
+      "heading": "Key Concepts",
+      "stopPropagation": "stopPropagation() — Prevents the event from reaching the next node.",
+      "stopImmediate": "stopImmediatePropagation() — Also prevents remaining listeners on the same node.",
+      "preventDefault": "preventDefault() — Cancels the browser's default behavior (e.g., form submission).",
+      "delegation": "Event Delegation — Attaching a single listener to a parent to handle child events."
+    }
+  },
+  "eventPresets": {
+    "basicBubbling": "Basic Bubbling",
+    "capturePhase": "Capture Phase",
+    "stopPropagation": "stopPropagation",
+    "stopImmediate": "stopImmediatePropagation",
+    "eventDelegation": "Event Delegation",
+    "preventDefault": "preventDefault",
+    "fullLifecycle": "Full Lifecycle",
+    "multipleListeners": "Multiple Listeners"
   }
 }

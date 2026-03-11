@@ -5,3 +5,7 @@ export { isApiError } from './error';
 // Engine store
 export { engineStore, useEngineStore } from './engine-store';
 export type { ExecutionStatus } from './engine-store';
+
+// Event store
+export { eventStore, useEventStore } from './event-store';
+export type { EventExecutionStatus } from './event-store';
