@@ -63,17 +63,24 @@ interface BindingRowProps {
   name: string;
   valueNode: ValueNode;
   kind: string;
+  initialized: boolean;
 }
 
-function BindingRow({ name, valueNode, kind }: BindingRowProps) {
+function BindingRow({ name, valueNode, kind, initialized }: BindingRowProps) {
   const kindColor = kind === 'const' ? 'text-teal-400' : kind === 'let' ? 'text-yellow-400' : 'text-orange-400';
 
   return (
-    <div className="flex items-start gap-2 px-3 py-1 hover:bg-gray-800 rounded text-xs font-mono">
+    <div
+      className={`flex items-start gap-2 px-3 py-1 hover:bg-gray-800 rounded text-xs font-mono ${!initialized ? 'opacity-60' : ''}`}
+    >
       <span className={`${kindColor} w-10 shrink-0`}>{kind}</span>
       <span className="text-gray-200 shrink-0">{name}</span>
       <span className="text-gray-500 shrink-0">=</span>
-      <ValueTree node={valueNode} />
+      {initialized ? (
+        <ValueTree node={valueNode} />
+      ) : (
+        <span className="text-red-400 italic">&lt;uninitialized&gt;</span>
+      )}
     </div>
   );
 }
@@ -107,7 +114,13 @@ export function ScopePanel({ environments }: ScopePanelProps) {
             <div className="text-xs text-gray-600 px-3 py-1">{t('scopeEmpty')}</div>
           ) : (
             env.bindings.map((binding) => (
-              <BindingRow key={binding.name} name={binding.name} valueNode={binding.valueNode} kind={binding.kind} />
+              <BindingRow
+                key={binding.name}
+                name={binding.name}
+                valueNode={binding.valueNode}
+                kind={binding.kind}
+                initialized={binding.initialized}
+              />
             ))
           )}
         </div>

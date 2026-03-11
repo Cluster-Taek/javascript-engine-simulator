@@ -107,10 +107,13 @@ export class Environment {
         .filter(([, binding]) => !binding.builtin)
         .map(([name, binding]) => ({
           name,
-          value: runtimeValueToString(binding.value),
-          valueNode: runtimeValueToValueNode(binding.value),
+          value: binding.initialized ? runtimeValueToString(binding.value) : '<uninitialized>',
+          valueNode: binding.initialized
+            ? runtimeValueToValueNode(binding.value)
+            : { kind: 'primitive' as const, display: '<uninitialized>' },
           kind: binding.kind,
           mutable: binding.mutable,
+          initialized: binding.initialized,
         })),
     };
   }

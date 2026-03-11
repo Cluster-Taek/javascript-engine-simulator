@@ -168,6 +168,20 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       }
     }
 
+    // Yield hoisting step when there are let/const TDZ bindings to visualize
+    const hasTDZ = body.some(
+      (stmt) => stmt.type === 'VariableDeclaration' && (stmt.kind === 'let' || stmt.kind === 'const')
+    );
+    if (hasTDZ) {
+      const tdzNames = body
+        .filter(
+          (stmt): stmt is VariableDeclaration =>
+            stmt.type === 'VariableDeclaration' && (stmt.kind === 'let' || stmt.kind === 'const')
+        )
+        .flatMap((stmt) => stmt.declarations.map((d) => `${stmt.kind} ${d.id.name}`));
+      yield createStep('hoisting', `Hoisting: ${tdzNames.join(', ')} (TDZ)`, env);
+    }
+
     let lastValue: RuntimeValue = { kind: 'undefined' };
     for (let i = 0; i < body.length; i++) {
       const stmt = body[i];
