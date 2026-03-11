@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { VscDebugStepBack, VscDebugStepOver } from 'react-icons/vsc';
 import { DEFAULT_SNIPPETS } from '@/shared/config';
 import { useEngineStore } from '@/shared/model';
 
@@ -8,6 +9,7 @@ export function DebugControls() {
   const t = useTranslations('debugControls');
   const status = useEngineStore((s) => s.executionStatus);
   const stepForward = useEngineStore((s) => s.stepForward);
+  const stepBack = useEngineStore((s) => s.stepBack);
   const run = useEngineStore((s) => s.run);
   const pause = useEngineStore((s) => s.pause);
   const reset = useEngineStore((s) => s.reset);
@@ -16,11 +18,13 @@ export function DebugControls() {
   const setExecutionSpeed = useEngineStore((s) => s.setExecutionSpeed);
   const currentStep = useEngineStore((s) => s.currentStep);
   const parseError = useEngineStore((s) => s.parseError);
+  const stepIndex = useEngineStore((s) => s.stepIndex);
 
   const isCompleted = status === 'completed';
   const isError = status === 'error';
   const isRunning = status === 'running';
   const hasParseError = parseError !== null && status === 'idle';
+  const canStepBack = stepIndex > 0;
 
   return (
     <div className="flex flex-col gap-2 p-3 bg-gray-800 border-t border-gray-700">
@@ -69,10 +73,22 @@ export function DebugControls() {
         )}
 
         <button
+          onClick={stepBack}
+          disabled={!canStepBack || isRunning}
+          className="px-2.5 py-1.5 bg-purple-700 hover:bg-purple-600 disabled:bg-gray-700 disabled:text-gray-500 text-white text-xs rounded transition-colors flex items-center gap-1"
+          title={t('stepBack')}
+        >
+          <VscDebugStepBack className="text-sm" />
+          {t('stepBack')}
+        </button>
+
+        <button
           onClick={stepForward}
           disabled={isCompleted || isError || isRunning || hasParseError}
-          className="px-3 py-1.5 bg-blue-700 hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-500 text-white text-xs rounded transition-colors"
+          className="px-2.5 py-1.5 bg-blue-700 hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-500 text-white text-xs rounded transition-colors flex items-center gap-1"
+          title={t('step')}
         >
+          <VscDebugStepOver className="text-sm" />
           {t('step')}
         </button>
 
@@ -94,7 +110,8 @@ export function DebugControls() {
           step={50}
           value={2050 - executionSpeed}
           onChange={(e) => setExecutionSpeed(2050 - Number(e.target.value))}
-          className="flex-1 accent-blue-500"
+          disabled={isRunning}
+          className="flex-1 accent-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
         />
         <span className="text-xs text-gray-400 w-16">
           {executionSpeed}

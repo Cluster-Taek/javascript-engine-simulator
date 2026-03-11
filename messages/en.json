@@ -23,7 +23,8 @@
     "selectSnippet": "Select snippet...",
     "pause": "⏸ Pause",
     "run": "▶ Run",
-    "step": "Step →",
+    "stepBack": "Back",
+    "step": "Step",
     "reset": "Reset",
     "speed": "Speed:",
     "msPerStep": "ms/step"

@@ -23,7 +23,8 @@
     "selectSnippet": "스니펫 선택...",
     "pause": "⏸ 일시정지",
     "run": "▶ 실행",
-    "step": "스텝 →",
+    "stepBack": "뒤로",
+    "step": "스텝",
     "reset": "초기화",
     "speed": "속도:",
     "msPerStep": "ms/스텝"

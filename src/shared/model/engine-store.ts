@@ -15,6 +15,8 @@ import { type Token } from '../lib/engine/tokenizer';
 
 export type ExecutionStatus = 'idle' | 'running' | 'paused' | 'completed' | 'error';
 
+const MAX_STEP_HISTORY = 500;
+
 interface EngineState {
   sourceCode: string;
   tokens: Token[];
@@ -23,6 +25,7 @@ interface EngineState {
   generator: Generator<StepResult, unknown, void> | null;
   currentStep: StepResult | null;
   stepHistory: StepResult[];
+  stepIndex: number;
   callStack: readonly StackFrame[];
   environments: readonly EnvironmentSnapshot[];
   consoleOutput: string[];
@@ -31,6 +34,7 @@ interface EngineState {
   currentAstNodeId: string | null;
   executionSpeed: number;
   intervalId: ReturnType<typeof setInterval> | null;
+  breakpoints: Set<number>;
   // Async runtime state
   webApis: WebApiEntry[];
   taskQueue: QueueEntry[];
@@ -43,9 +47,11 @@ interface EngineActions {
   parse: () => void;
   reset: () => void;
   stepForward: () => void;
+  stepBack: () => void;
   run: () => void;
   pause: () => void;
   setExecutionSpeed: (ms: number) => void;
+  toggleBreakpoint: (line: number) => void;
 }
 
 type EngineStore = EngineState & EngineActions;
@@ -70,6 +76,7 @@ const initialState: EngineState = {
   generator: null,
   currentStep: null,
   stepHistory: [],
+  stepIndex: -1,
   callStack: [],
   environments: [],
   consoleOutput: [],
@@ -78,6 +85,7 @@ const initialState: EngineState = {
   currentAstNodeId: null,
   executionSpeed: 500,
   intervalId: null,
+  breakpoints: new Set(),
   webApis: [],
   taskQueue: [],
   microtaskQueue: [],
@@ -123,6 +131,7 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
       generator: null,
       currentStep: null,
       stepHistory: [],
+      stepIndex: -1,
       callStack: [],
       environments: [],
       consoleOutput: [],
@@ -130,6 +139,7 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
       currentLine: null,
       currentAstNodeId: null,
       intervalId: null,
+      breakpoints: new Set(),
       webApis: [],
       taskQueue: [],
       microtaskQueue: [],
@@ -140,10 +150,35 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
 
   stepForward: () => {
     const state = get();
-    const { executionStatus } = state;
-    let { generator, ast, stepHistory } = state;
+    const { executionStatus, stepIndex, stepHistory } = state;
+    let { generator, ast } = state;
 
     if (executionStatus === 'completed' || executionStatus === 'error') return;
+
+    // If replaying history (stepped back earlier)
+    if (stepIndex < stepHistory.length - 1) {
+      const nextIndex = stepIndex + 1;
+      const step = stepHistory[nextIndex];
+      const asyncSnapshot = step.asyncSnapshot;
+      set({
+        stepIndex: nextIndex,
+        currentStep: step,
+        callStack: step.callStack,
+        environments: step.environments,
+        consoleOutput: [...step.consoleOutput],
+        currentLine: step.loc?.start.line ?? null,
+        executionStatus: executionStatus === 'running' ? 'running' : 'paused',
+        ...(asyncSnapshot
+          ? {
+              webApis: [...asyncSnapshot.webApis] as WebApiEntry[],
+              taskQueue: [...asyncSnapshot.taskQueue] as QueueEntry[],
+              microtaskQueue: [...asyncSnapshot.microtaskQueue] as QueueEntry[],
+              eventLoopPhase: asyncSnapshot.eventLoopPhase,
+            }
+          : {}),
+      });
+      return;
+    }
 
     // Initialize generator if needed
     if (generator === null) {
@@ -170,13 +205,21 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
         return;
       }
       const step = value as StepResult;
-      stepHistory = [...stepHistory, step];
+      let newHistory = [...stepHistory, step];
+      let newIndex = newHistory.length - 1;
+
+      // Trim history if exceeds limit
+      if (newHistory.length > MAX_STEP_HISTORY) {
+        newHistory = newHistory.slice(newHistory.length - MAX_STEP_HISTORY);
+        newIndex = newHistory.length - 1;
+      }
 
       const asyncSnapshot = step.asyncSnapshot;
 
       set({
         currentStep: step,
-        stepHistory,
+        stepHistory: newHistory,
+        stepIndex: newIndex,
         callStack: step.callStack,
         environments: step.environments,
         consoleOutput: [...step.consoleOutput],
@@ -228,10 +271,13 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
         return;
       }
       get().stepForward();
-      const newStatus = get().executionStatus;
-      if (newStatus === 'completed' || newStatus === 'error') {
+      const afterStep = get();
+      if (afterStep.executionStatus === 'completed' || afterStep.executionStatus === 'error') {
         clearInterval(id);
         set({ intervalId: null });
+      } else if (afterStep.currentLine !== null && afterStep.breakpoints.has(afterStep.currentLine)) {
+        clearInterval(id);
+        set({ intervalId: null, executionStatus: 'paused' });
       }
     }, executionSpeed);
 
@@ -248,6 +294,51 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
 
   setExecutionSpeed: (ms) => {
     set({ executionSpeed: ms });
+  },
+
+  stepBack: () => {
+    const { stepIndex, stepHistory, executionStatus, intervalId } = get();
+
+    // Pause if running
+    if (intervalId !== null) {
+      clearInterval(intervalId);
+      set({ intervalId: null });
+    }
+
+    if (stepIndex <= 0 || stepHistory.length === 0) return;
+
+    const prevIndex = stepIndex - 1;
+    const step = stepHistory[prevIndex];
+    const asyncSnapshot = step.asyncSnapshot;
+
+    set({
+      stepIndex: prevIndex,
+      currentStep: step,
+      callStack: step.callStack,
+      environments: step.environments,
+      consoleOutput: [...step.consoleOutput],
+      currentLine: step.loc?.start.line ?? null,
+      executionStatus: executionStatus === 'completed' || executionStatus === 'error' ? 'paused' : executionStatus,
+      ...(asyncSnapshot
+        ? {
+            webApis: [...asyncSnapshot.webApis] as WebApiEntry[],
+            taskQueue: [...asyncSnapshot.taskQueue] as QueueEntry[],
+            microtaskQueue: [...asyncSnapshot.microtaskQueue] as QueueEntry[],
+            eventLoopPhase: asyncSnapshot.eventLoopPhase,
+          }
+        : {}),
+    });
+  },
+
+  toggleBreakpoint: (line) => {
+    const { breakpoints } = get();
+    const next = new Set(breakpoints);
+    if (next.has(line)) {
+      next.delete(line);
+    } else {
+      next.add(line);
+    }
+    set({ breakpoints: next });
   },
 }));
 

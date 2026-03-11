@@ -49,3 +49,26 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
   background: #484f58;
 }
+
+/* Monaco editor breakpoint & execution line styles */
+.breakpoint-glyph {
+  background: #f85149;
+  border-radius: 50%;
+  width: 10px !important;
+  height: 10px !important;
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
+.current-line-highlight {
+  background: rgba(210, 153, 34, 0.15) !important;
+}
+
+.current-line-glyph {
+  background: #d29922;
+  clip-path: polygon(20% 0%, 100% 50%, 20% 100%);
+  width: 10px !important;
+  height: 14px !important;
+  margin-top: 3px;
+  margin-left: 5px;
+}
