@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "title": "JavaScript 엔진 시뮬레이터",
+    "description": "단계별 JavaScript 엔진 시각화 도구: Tokenizer → Parser → Interpreter"
+  },
+  "dashboard": {
+    "title": "JavaScript 엔진 시뮬레이터",
+    "subtitle": "Tokenizer → Parser → Interpreter · 단계별 시각화 도구",
+    "helpAriaLabel": "도움말"
+  },
+  "panels": {
+    "codeEditor": "코드 편집기",
+    "tokenStream": "토큰 스트림",
+    "console": "콘솔",
+    "callStack": "콜 스택",
+    "webApis": "Web API",
+    "taskQueue": "태스크 큐",
+    "microtaskQueue": "마이크로태스크 큐",
+    "scope": "스코프"
+  },
+  "debugControls": {
+    "example": "예제:",
+    "selectSnippet": "스니펫 선택...",
+    "pause": "⏸ 일시정지",
+    "run": "▶ 실행",
+    "step": "스텝 →",
+    "reset": "초기화",
+    "speed": "속도:",
+    "msPerStep": "ms/스텝"
+  },
+  "emptyStates": {
+    "console": "콘솔 출력이 여기에 표시됩니다.",
+    "callStack": "콜 스택이 비어 있습니다.",
+    "scope": "스코프 데이터가 없습니다.",
+    "scopeEmpty": "(비어 있음)",
+    "webApi": "대기 중인 Web API가 없습니다.",
+    "taskQueue": "태스크 큐가 비어 있습니다.",
+    "microtaskQueue": "마이크로태스크 큐가 비어 있습니다.",
+    "tokenList": "토큰이 없습니다. 코드를 작성하고 파싱하세요.",
+    "astTree": "AST가 없습니다. 먼저 코드를 파싱하세요."
+  },
+  "webApi": {
+    "callback": "콜백:",
+    "ticksRemaining": "{count}틱 남음"
+  },
+  "taskQueueEntry": {
+    "from": "출처:"
+  },
+  "frameDetail": {
+    "frameLabel": "프레임:",
+    "line": "라인 {line}",
+    "astTab": "AST",
+    "scopeTab": "스코프"
+  },
+  "eventLoop": {
+    "title": "이벤트 루프",
+    "phases": {
+      "idle": "유휴",
+      "checkingStack": "스택 확인 중",
+      "drainingMicrotasks": "마이크로태스크 처리 중",
+      "pickingTask": "태스크 선택 중"
+    }
+  },
+  "help": {
+    "title": "JavaScript 엔진 시뮬레이터 — 도움말",
+    "about": {
+      "heading": "소개",
+      "description": "JavaScript Engine Simulator는 JS 코드가 Tokenizer → Parser → Interpreter 파이프라인을 단계별로 흐르는 과정을 시각화하는 교육용 도구입니다."
+    },
+    "simulatorNotice": {
+      "heading": "시뮬레이터 안내",
+      "virtualSimulatorText": "이것은 <highlight>가상 시뮬레이터</highlight>로, 실제 JS 런타임이 아닙니다.",
+      "fetchMocked": "<code>fetch</code>는 모의 응답을 반환합니다.",
+      "setTimeoutTick": "<code>setTimeout</code>은 실제 시간이 아닌 틱 기반 스케줄로 실행됩니다."
+    },
+    "supportedFeatures": {
+      "heading": "지원 기능",
+      "syntax": "구문",
+      "expressions": "표현식",
+      "builtins": "내장 함수",
+      "array": "배열",
+      "asyncMode": "비동기 모드"
+    }
+  },
+  "errors": {
+    "title": "문제가 발생했습니다",
+    "unknownMessage": "알 수 없는 오류가 발생했습니다.",
+    "errorId": "오류 ID: {digest}",
+    "retry": "다시 시도"
+  },
+  "languageSwitcher": {
+    "label": "언어",
+    "en": "English",
+    "ko": "한국어"
+  }
+}

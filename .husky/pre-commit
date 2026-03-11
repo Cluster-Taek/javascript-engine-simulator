@@ -1,0 +1,15 @@
+# Lint-staged 실행 (변경된 파일만 - ESLint, Prettier)
+echo "🔍 Running lint-staged..."
+pnpm exec lint-staged
+
+# TypeScript 타입 체크 (전체 프로젝트)
+echo "📝 Running TypeScript type check..."
+pnpm exec tsc --noEmit
+
+# Steiger FSD 검증 (전체 프로젝트)
+echo "🏗️  Running Steiger FSD validation..."
+pnpm exec steiger ./src
+
+# 변경된 파일 관련 테스트 실행
+echo "🧪 Running related tests..."
+pnpm exec vitest run --changed HEAD --passWithNoTests

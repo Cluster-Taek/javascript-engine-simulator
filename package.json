@@ -1,0 +1,113 @@
+{
+  "name": "next-boilerplate",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "prepare": "husky",
+    "dev": "PORT=3000 next dev",
+    "build": "next build",
+    "start": "PORT=3000 next start",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "type-check": "tsc --noEmit",
+    "fsd": "steiger ./src",
+    "pre-commit": "lint-staged && pnpm type-check && pnpm fsd",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
+    "test:related": "vitest run --changed HEAD --passWithNoTests",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:chromium": "playwright test --project=chromium",
+    "cli:dev": "cd cli && pnpm dev",
+    "cli:build": "cd cli && pnpm build",
+    "cli:test": "cd cli && node dist/index.js test-project",
+    "cli:link": "cd cli && npm link",
+    "cli:publish": "cd cli && pnpm publish --access public"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
+    "@tanstack/react-query": "^5.90.21",
+    "motion": "^12.35.2",
+    "next": "^16.1.6",
+    "next-intl": "^4.8.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-icons": "^5.5.0",
+    "react-spinners": "^0.17.0",
+    "zod": "^4.3.6",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.4.1",
+    "@commitlint/config-conventional": "^20.4.1",
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.2",
+    "@feature-sliced/steiger-plugin": "^0.5.7",
+    "@playwright/test": "^1.58.2",
+    "@tailwindcss/postcss": "^4.2.0",
+    "@tanstack/react-query-devtools": "^5.91.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^20.19.33",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/ui": "^4.0.18",
+    "autoprefixer": "^10.4.24",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^16.1.6",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-compiler": "19.1.0-rc.2",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-testing-library": "^7.16.0",
+    "happy-dom": "^20.6.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "postcss": "^8.5.6",
+    "prettier": "^3.8.1",
+    "server-only": "^0.0.1",
+    "steiger": "^0.5.11",
+    "tailwindcss": "^4.2.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.0",
+    "vitest": "^4.0.18"
+  },
+  "description": "Bolierplate of Next JS",
+  "main": "index.js",
+  "repository": "https://github.com/Cluster-Taek/create-next-claude-app",
+  "author": "Cluster-Taek <yst811@naver.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=10.0.0"
+  },
+  "packageManager": "pnpm@9.15.4+sha256.9bee59c7313a216722c079c1e22160dea7f88df4e0c3450b1d7b01b882336c6a",
+  "pnpm": {
+    "overrides": {
+      "minimatch@<5": "^5.1.6"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,jsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
+  }
+}

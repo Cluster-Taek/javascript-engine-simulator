@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-primary-black: #1f1f1f;
+  --color-primary-white: #ffffff;
+  --color-primary-01: #0096aa;
+  --color-primary-02: #007c8c;
+
+  /* Engine simulator dark theme */
+  --color-engine-bg: #0d1117;
+  --color-engine-panel: #161b22;
+  --color-engine-border: #30363d;
+  --color-engine-text: #c9d1d9;
+  --color-engine-text-muted: #8b949e;
+  --color-engine-accent: #58a6ff;
+  --color-engine-green: #3fb950;
+  --color-engine-yellow: #d29922;
+  --color-engine-red: #f85149;
+  --color-engine-purple: #bc8cff;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #0d1117;
+  color: #c9d1d9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #161b22;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #484f58;
+}

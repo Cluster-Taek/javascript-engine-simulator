@@ -1,0 +1,96 @@
+{
+  "metadata": {
+    "title": "JavaScript Engine Simulator",
+    "description": "Step-by-step JavaScript engine visualizer: Tokenizer → Parser → Interpreter"
+  },
+  "dashboard": {
+    "title": "JavaScript Engine Simulator",
+    "subtitle": "Tokenizer → Parser → Interpreter · Step-by-Step Visualizer",
+    "helpAriaLabel": "Help"
+  },
+  "panels": {
+    "codeEditor": "Code Editor",
+    "tokenStream": "Token Stream",
+    "console": "Console",
+    "callStack": "Call Stack",
+    "webApis": "Web APIs",
+    "taskQueue": "Task Queue",
+    "microtaskQueue": "Microtask Queue",
+    "scope": "Scope"
+  },
+  "debugControls": {
+    "example": "Example:",
+    "selectSnippet": "Select snippet...",
+    "pause": "⏸ Pause",
+    "run": "▶ Run",
+    "step": "Step →",
+    "reset": "Reset",
+    "speed": "Speed:",
+    "msPerStep": "ms/step"
+  },
+  "emptyStates": {
+    "console": "Console output will appear here.",
+    "callStack": "Call stack is empty.",
+    "scope": "No scope data yet.",
+    "scopeEmpty": "(empty)",
+    "webApi": "No pending Web APIs.",
+    "taskQueue": "Task Queue is empty.",
+    "microtaskQueue": "Microtask Queue is empty.",
+    "tokenList": "No tokens yet. Write code and parse it.",
+    "astTree": "No AST yet. Parse your code first."
+  },
+  "webApi": {
+    "callback": "cb:",
+    "ticksRemaining": "{count} tick(s) remaining"
+  },
+  "taskQueueEntry": {
+    "from": "from:"
+  },
+  "frameDetail": {
+    "frameLabel": "frame:",
+    "line": "line {line}",
+    "astTab": "AST",
+    "scopeTab": "Scope"
+  },
+  "eventLoop": {
+    "title": "Event Loop",
+    "phases": {
+      "idle": "Idle",
+      "checkingStack": "Checking Stack",
+      "drainingMicrotasks": "Draining Microtasks",
+      "pickingTask": "Picking Task"
+    }
+  },
+  "help": {
+    "title": "JavaScript Engine Simulator — Help",
+    "about": {
+      "heading": "About",
+      "description": "JavaScript Engine Simulator is an educational tool that visualizes how JS code flows through the Tokenizer → Parser → Interpreter pipeline, step by step."
+    },
+    "simulatorNotice": {
+      "heading": "Simulator Notice",
+      "virtualSimulatorText": "This is a <highlight>virtual simulator</highlight>, not a real JS runtime.",
+      "fetchMocked": "<code>fetch</code> returns a mocked response.",
+      "setTimeoutTick": "<code>setTimeout</code> runs on a tick-based schedule, not real time."
+    },
+    "supportedFeatures": {
+      "heading": "Supported Features",
+      "syntax": "Syntax",
+      "expressions": "Expressions",
+      "builtins": "Built-ins",
+      "array": "Array",
+      "asyncMode": "Async Mode"
+    }
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "unknownMessage": "An unknown error occurred.",
+    "errorId": "Error ID: {digest}",
+    "retry": "Try again"
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "en": "English",
+    "ko": "한국어"
+  }
+}
