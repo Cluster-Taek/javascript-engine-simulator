@@ -154,16 +154,17 @@ export const eventStore = createStore<EventStore>()((set, get) => ({
       newIndex = newHistory.length - 1;
     }
 
+    const isComplete = step.kind === 'propagation-complete';
+
     set({
       currentStep: step,
       stepHistory: newHistory,
       stepIndex: newIndex,
       consoleOutput: [...step.consoleOutput],
-      activeNodeId: step.nodeId,
-      activePhase: step.phase,
+      activeNodeId: isComplete ? null : step.nodeId,
+      activePhase: isComplete ? null : step.phase,
       highlightedListenerId: step.listenerId ?? null,
-      executionStatus:
-        step.kind === 'propagation-complete' ? 'completed' : executionStatus === 'running' ? 'running' : 'paused',
+      executionStatus: isComplete ? 'completed' : executionStatus === 'running' ? 'running' : 'paused',
     });
   },
 

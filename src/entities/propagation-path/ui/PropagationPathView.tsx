@@ -51,8 +51,8 @@ interface PropagationPathViewProps {
 
 export function PropagationPathView({ currentStep, activePhase, root, targetNodeId }: PropagationPathViewProps) {
   const path = findPathToNode(root, targetNodeId) ?? [];
-  const phase = activePhase ?? 'capturing';
-  const style = phaseConfig[phase];
+  const phase = activePhase;
+  const style = phase ? phaseConfig[phase] : null;
 
   return (
     <div className="space-y-3">
@@ -92,7 +92,9 @@ export function PropagationPathView({ currentStep, activePhase, root, targetNode
           key={currentStep.id}
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
-          className={`text-xs p-2 rounded border ${style.bg} ${style.text} ${style.border} font-mono`}
+          className={`text-xs p-2 rounded border font-mono ${
+            style ? `${style.bg} ${style.text} ${style.border}` : 'bg-gray-500/15 text-gray-300 border-gray-500'
+          }`}
         >
           {currentStep.description}
           {currentStep.propagationStopped && <span className="ml-2 text-red-400">[propagation stopped]</span>}
