@@ -16,6 +16,7 @@ export type TokenType =
   | 'Null'
   | 'Undefined'
   | 'New'
+  | 'This'
   | 'Try'
   | 'Catch'
   | 'Finally'
@@ -79,6 +80,7 @@ export const KEYWORDS: Record<string, TokenType> = {
   null: 'Null',
   undefined: 'Undefined',
   new: 'New',
+  this: 'This',
   try: 'Try',
   catch: 'Catch',
   finally: 'Finally',

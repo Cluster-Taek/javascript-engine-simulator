@@ -204,6 +204,7 @@
     "basics": "Basics",
     "dataAndControl": "Data & Control",
     "asyncEventLoop": "Async / Event Loop",
+    "thisBinding": "this Binding",
     "closureBasics": "Basic",
     "loopClosures": "Loop Closures",
     "closureAdvanced": "Advanced"

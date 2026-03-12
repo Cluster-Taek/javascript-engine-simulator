@@ -212,6 +212,9 @@ export function runtimeValueToValueNode(value: RuntimeValue): ValueNode {
 export function createGlobalEnvironment(): Environment {
   const env = new Environment('global');
 
+  // Global this binding (undefined in our engine, like strict mode)
+  env.declareBuiltin('this', { kind: 'undefined' });
+
   // console.log - handled specially in interpreter
   const undefinedVal: RuntimeValue = { kind: 'undefined' };
   env.declareBuiltin('console', {

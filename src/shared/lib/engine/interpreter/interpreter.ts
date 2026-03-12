@@ -43,6 +43,7 @@ import {
   type ArrayExpression,
   type ObjectExpression,
   type AwaitExpression,
+  type ThisExpression,
 } from '../parser/types';
 
 let stepIdCounter = 0;
@@ -659,6 +660,9 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         return val;
       }
 
+      case 'ThisExpression':
+        return env.resolve('this');
+
       case 'ArrayExpression':
         return yield* evaluateArrayExpression(expr, env);
       case 'ObjectExpression':
@@ -739,6 +743,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
           body,
           closure: env,
           async: expr.async,
+          isArrow: true,
         };
         registerClosure(fnVal);
         return fnVal;
@@ -754,7 +759,14 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
           return callee.call(args);
         }
         if (callee.kind === 'function') {
+          if (callee.isArrow) {
+            throw new RuntimeError(`TypeError: ${callee.name} is not a constructor`);
+          }
+          // Create the new object that will be bound to `this`
+          const newObj: RuntimeValue = { kind: 'object', properties: new Map() };
           const fnEnv = createFnEnv(callee.name, 'new', callee.closure);
+          // Bind this to the new object
+          fnEnv.declare('this', 'const', newObj);
           for (let i = 0; i < callee.params.length; i++) {
             fnEnv.declare(callee.params[i], 'let', args[i] ?? { kind: 'undefined' });
           }
@@ -772,10 +784,17 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
             fnEnv,
             expr
           );
+          let returnValue: RuntimeValue = newObj;
           try {
             yield* executeBlock(callee.body.body, fnEnv);
           } catch (e) {
-            if (!(e instanceof ReturnSignal)) {
+            if (e instanceof ReturnSignal) {
+              // If constructor returns an object-like value, use it; otherwise use newObj
+              // In JS, arrays and functions are also objects
+              if (e.value.kind === 'object' || e.value.kind === 'array' || e.value.kind === 'function') {
+                returnValue = e.value;
+              }
+            } else {
               callStack.pop();
               envStack.pop();
               throw e;
@@ -783,8 +802,8 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
           }
           callStack.pop();
           envStack.pop();
-          yield createStep('exit-function', `new ${callee.name} constructed`, env, expr);
-          return { kind: 'undefined' };
+          yield createStep('exit-function', `new ${callee.name} constructed`, env, expr, returnValue);
+          return returnValue;
         }
         throw new RuntimeError(`TypeError: '${runtimeValueToString(callee)}' is not a constructor`);
       }
@@ -987,7 +1006,15 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         : expr.left.property.type === 'Identifier'
           ? expr.left.property.name
           : '';
-      newVal = yield* evaluateExpression(expr.right, env);
+      if (expr.operator === '=') {
+        newVal = yield* evaluateExpression(expr.right, env);
+      } else {
+        const current = getMemberProperty(obj, propKey);
+        const right = yield* evaluateExpression(expr.right, env);
+        const currentNum = current.kind === 'number' ? current.value : NaN;
+        const rightNum = right.kind === 'number' ? right.value : NaN;
+        newVal = { kind: 'number', value: expr.operator === '+=' ? currentNum + rightNum : currentNum - rightNum };
+      }
       if (obj.kind === 'object') {
         obj.properties.set(propKey, newVal);
       } else if (obj.kind === 'array') {
@@ -1011,6 +1038,26 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       const newVal: RuntimeValue = { kind: 'number', value: newNum };
       env.assign(name, newVal);
       yield createStep('variable-assign', `${name}${expr.operator} → ${newNum}`, env, expr, newVal);
+      return expr.prefix ? newVal : { kind: 'number', value: currentNum };
+    }
+    if (expr.argument.type === 'MemberExpression') {
+      const obj = yield* evaluateExpression(expr.argument.object, env);
+      const key = expr.argument.computed
+        ? runtimeValueToString(yield* evaluateExpression(expr.argument.property, env))
+        : expr.argument.property.type === 'Identifier'
+          ? expr.argument.property.name
+          : '';
+      const current = getMemberProperty(obj, key);
+      const currentNum = current.kind === 'number' ? current.value : NaN;
+      const newNum = expr.operator === '++' ? currentNum + 1 : currentNum - 1;
+      const newVal: RuntimeValue = { kind: 'number', value: newNum };
+      if (obj.kind === 'object') {
+        obj.properties.set(key, newVal);
+      } else if (obj.kind === 'array') {
+        const idx = parseInt(key, 10);
+        if (!isNaN(idx)) obj.elements[idx] = newVal;
+      }
+      yield createStep('variable-assign', `${key}${expr.operator} → ${newNum}`, env, expr, newVal);
       return expr.prefix ? newVal : { kind: 'number', value: currentNum };
     }
     return { kind: 'undefined' };
@@ -1040,11 +1087,27 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       return { kind: 'undefined' };
     }
 
-    // Evaluate callee
+    // Evaluate callee & determine this binding (receiver)
     let callee: RuntimeValue;
+    let receiver: RuntimeValue = { kind: 'undefined' };
 
     if (expr.callee.type === 'MemberExpression') {
-      callee = yield* evaluateMemberExpression(expr.callee, env);
+      // Method call: obj.method() → this = obj
+      receiver = yield* evaluateExpression(expr.callee.object, env);
+      // Resolve the property from the receiver
+      let key: string;
+      if (expr.callee.computed) {
+        const propVal = yield* evaluateExpression(expr.callee.property, env);
+        key =
+          propVal.kind === 'number'
+            ? String(propVal.value)
+            : propVal.kind === 'string'
+              ? propVal.value
+              : runtimeValueToString(propVal);
+      } else {
+        key = expr.callee.property.type === 'Identifier' ? expr.callee.property.name : '';
+      }
+      callee = getMemberProperty(receiver, key);
     } else {
       callee = yield* evaluateExpression(expr.callee, env);
     }
@@ -1073,6 +1136,10 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       };
 
       const fnEnv = createFnEnv(callee.name, 'function', callee.closure);
+      // Bind this for non-arrow functions
+      if (!callee.isArrow) {
+        fnEnv.declare('this', 'const', receiver);
+      }
       for (let i = 0; i < callee.params.length; i++) {
         fnEnv.declare(callee.params[i], 'let', args[i] ?? { kind: 'undefined' });
       }
@@ -1146,6 +1213,10 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
 
     // Regular (sync) function handling
     const fnEnv = createFnEnv(callee.name, 'function', callee.closure);
+    // Bind this for non-arrow functions
+    if (!callee.isArrow) {
+      fnEnv.declare('this', 'const', receiver);
+    }
     for (let i = 0; i < callee.params.length; i++) {
       fnEnv.declare(callee.params[i], 'let', args[i] ?? { kind: 'undefined' });
     }
@@ -1192,6 +1263,53 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     return returnValue;
   }
 
+  function getMemberProperty(obj: RuntimeValue, key: string): RuntimeValue {
+    if (obj.kind === 'undefined' || obj.kind === 'null') {
+      throw new RuntimeError(`TypeError: Cannot read properties of ${obj.kind} (reading '${key}')`);
+    }
+    if (obj.kind === 'object') {
+      return obj.properties.get(key) ?? { kind: 'undefined' };
+    }
+    if (obj.kind === 'array') {
+      if (key === 'length') return { kind: 'number', value: obj.elements.length };
+      const idx = parseInt(key, 10);
+      if (!isNaN(idx)) return obj.elements[idx] ?? { kind: 'undefined' };
+      if (key === 'push') {
+        return {
+          kind: 'native-function',
+          name: 'Array.push',
+          call: (args) => {
+            obj.elements.push(...args);
+            return { kind: 'number', value: obj.elements.length };
+          },
+        };
+      }
+      if (key === 'pop') {
+        return {
+          kind: 'native-function',
+          name: 'Array.pop',
+          call: () => obj.elements.pop() ?? { kind: 'undefined' },
+        };
+      }
+      if (key === 'forEach') {
+        return { kind: 'native-function', name: 'Array.forEach', call: () => ({ kind: 'undefined' }) };
+      }
+      if (key === 'map') {
+        return { kind: 'native-function', name: 'Array.map', call: () => ({ kind: 'undefined' }) };
+      }
+    }
+    if (obj.kind === 'string') {
+      if (key === 'length') return { kind: 'number', value: obj.value.length };
+    }
+    if (obj.kind === 'native-function') {
+      return obj.properties?.get(key) ?? { kind: 'undefined' };
+    }
+    if (obj.kind === 'promise') {
+      return obj.methods?.get(key) ?? { kind: 'undefined' };
+    }
+    return { kind: 'undefined' };
+  }
+
   function* evaluateMemberExpression(
     expr: MemberExpression,
     env: Environment
@@ -1211,49 +1329,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       key = expr.property.type === 'Identifier' ? expr.property.name : '';
     }
 
-    if (obj.kind === 'object') {
-      return obj.properties.get(key) ?? { kind: 'undefined' };
-    }
-    if (obj.kind === 'array') {
-      if (key === 'length') return { kind: 'number', value: obj.elements.length };
-      const idx = parseInt(key, 10);
-      if (!isNaN(idx)) return obj.elements[idx] ?? { kind: 'undefined' };
-      // Array methods
-      if (key === 'push') {
-        return {
-          kind: 'native-function',
-          name: 'Array.push',
-          call: (args) => {
-            obj.elements.push(...args);
-            return { kind: 'number', value: obj.elements.length };
-          },
-        };
-      }
-      if (key === 'pop') {
-        return {
-          kind: 'native-function',
-          name: 'Array.pop',
-          call: () => obj.elements.pop() ?? { kind: 'undefined' },
-        };
-      }
-      if (key === 'forEach') {
-        // Can't easily make this a generator via native-function, skip for now
-        return { kind: 'native-function', name: 'Array.forEach', call: () => ({ kind: 'undefined' }) };
-      }
-      if (key === 'map') {
-        return { kind: 'native-function', name: 'Array.map', call: () => ({ kind: 'undefined' }) };
-      }
-    }
-    if (obj.kind === 'string') {
-      if (key === 'length') return { kind: 'number', value: obj.value.length };
-    }
-    if (obj.kind === 'native-function') {
-      return obj.properties?.get(key) ?? { kind: 'undefined' };
-    }
-    if (obj.kind === 'promise') {
-      return obj.methods?.get(key) ?? { kind: 'undefined' };
-    }
-    return { kind: 'undefined' };
+    return getMemberProperty(obj, key);
   }
 
   // Start execution

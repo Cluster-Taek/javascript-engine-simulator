@@ -302,6 +302,96 @@ console.log("2. Script end");
       },
     ],
   },
+  {
+    labelKey: 'thisBinding',
+    snippets: [
+      {
+        name: 'Method Call (this)',
+        code: `let user = {
+  name: "Alice",
+  greet: function() {
+    return "Hello, " + this.name;
+  }
+};
+
+let msg = user.greet();
+console.log(msg);
+`,
+      },
+      {
+        name: 'Constructor (new + this)',
+        code: `function Person(name, age) {
+  this.name = name;
+  this.age = age;
+  this.hello = function() {
+    return this.name + " is " + this.age;
+  };
+}
+
+let alice = new Person("Alice", 25);
+console.log(alice.hello());
+
+let bob = new Person("Bob", 30);
+console.log(bob.hello());
+`,
+      },
+      {
+        name: 'Lost this',
+        code: `let counter = {
+  count: 0,
+  increment: function() {
+    this.count++;
+    return this.count;
+  }
+};
+
+// Method call: this = counter
+console.log("method:", counter.increment());
+
+// Extracted: this = undefined
+let fn = counter.increment;
+try {
+  fn();
+} catch (e) {
+  console.log("error:", e);
+}
+`,
+      },
+      {
+        name: 'Dynamic this',
+        code: `// Same function, different this
+function introduce() {
+  return "I am " + this.name;
+}
+
+let alice = { name: "Alice", intro: introduce };
+let bob = { name: "Bob", intro: introduce };
+
+// this is decided at call time
+console.log(alice.intro());
+console.log(bob.intro());
+`,
+      },
+      {
+        name: 'Arrow vs Regular (this)',
+        code: `let obj = {
+  name: "Alice",
+  // arrow: inherits this from outer scope
+  arrowFn: () => {
+    return "arrow: " + this.name;
+  },
+  // regular: this = obj (caller)
+  regularFn: function() {
+    return "regular: " + this.name;
+  }
+};
+
+console.log(obj.regularFn());
+console.log(obj.arrowFn());
+`,
+      },
+    ],
+  },
 ];
 
 export const DEFAULT_SNIPPETS: CodeSnippet[] = DEFAULT_SNIPPET_GROUPS.flatMap((g) => g.snippets);

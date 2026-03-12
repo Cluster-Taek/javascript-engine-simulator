@@ -201,12 +201,13 @@
     }
   },
   "snippetGroups": {
-    "basics": "\uae30\ubcf8",
-    "dataAndControl": "\ub370\uc774\ud130\uc640 \uc81c\uc5b4",
-    "asyncEventLoop": "\ube44\ub3d9\uae30 / \uc774\ubca4\ud2b8 \ub8e8\ud504",
-    "closureBasics": "\uae30\ubcf8",
-    "loopClosures": "\ub8e8\ud504 \ud074\ub85c\uc800",
-    "closureAdvanced": "\uace0\uae09"
+    "basics": "기본",
+    "dataAndControl": "데이터와 제어",
+    "asyncEventLoop": "비동기 / 이벤트 루프",
+    "thisBinding": "this 바인딩",
+    "closureBasics": "기본",
+    "loopClosures": "루프 클로저",
+    "closureAdvanced": "고급"
   },
   "eventPresets": {
     "basicBubbling": "기본 버블링",
