@@ -26,10 +26,10 @@ export function SimulatorNav() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
+        className="p-1.5 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-gray-100 hover:border-gray-600 transition-all cursor-pointer"
         aria-label={t('menuAriaLabel')}
       >
-        <FiMenu size={18} />
+        <FiMenu size={16} />
       </button>
 
       <AnimatePresence>
@@ -46,24 +46,24 @@ export function SimulatorNav() {
 
             {/* Drawer */}
             <motion.nav
-              className="fixed top-0 left-0 h-full w-72 bg-gray-900 border-r border-gray-800 z-50 flex flex-col"
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'tween', duration: 0.2 }}
+              className="fixed top-3 left-3 bottom-3 w-72 bg-gray-900/95 backdrop-blur-sm border border-gray-700/50 rounded-2xl z-50 flex flex-col shadow-2xl shadow-black/40"
+              initial={{ x: '-110%', opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: '-110%', opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800/60">
                 <span className="text-sm font-bold text-gray-100">{t('title')}</span>
                 <button
                   onClick={close}
-                  className="text-gray-400 hover:text-gray-200 transition-colors cursor-pointer"
+                  className="p-1 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-gray-800 transition-all cursor-pointer"
                   aria-label={t('closeAriaLabel')}
                 >
-                  <FiX size={18} />
+                  <FiX size={16} />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto py-2">
+              <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
                 {SIMULATORS.map((sim) => {
                   const isActive = pathname === sim.href || (sim.href !== '/' && pathname.startsWith(sim.href));
 
@@ -72,7 +72,7 @@ export function SimulatorNav() {
                       key={sim.id}
                       href={sim.href}
                       onClick={close}
-                      className={`flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
+                      className={`flex items-center gap-3 px-3 py-3 text-sm rounded-xl transition-all ${
                         isActive ? 'bg-gray-800 text-white' : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200'
                       }`}
                     >
