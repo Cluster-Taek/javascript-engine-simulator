@@ -24,6 +24,12 @@ export function EngineDashboard() {
         </div>
         <span className="text-xs text-gray-500 flex-1">{t('subtitle')}</span>
         <Link
+          href="/closure-simulator"
+          className="text-xs text-gray-400 hover:text-gray-200 transition-colors px-2 py-1 border border-gray-700 rounded"
+        >
+          {t('goToClosureSimulator')}
+        </Link>
+        <Link
           href="/event-simulator"
           className="text-xs text-gray-400 hover:text-gray-200 transition-colors px-2 py-1 border border-gray-700 rounded"
         >

@@ -2,10 +2,14 @@
 
 import { useTranslations } from 'next-intl';
 import { VscDebugStepBack, VscDebugStepOver } from 'react-icons/vsc';
-import { DEFAULT_SNIPPETS } from '@/shared/config';
+import { DEFAULT_SNIPPETS, type CodeSnippet } from '@/shared/config';
 import { useEngineStore } from '@/shared/model';
 
-export function DebugControls() {
+interface DebugControlsProps {
+  snippets?: CodeSnippet[];
+}
+
+export function DebugControls({ snippets = DEFAULT_SNIPPETS }: DebugControlsProps) {
   const t = useTranslations('debugControls');
   const status = useEngineStore((s) => s.executionStatus);
   const stepForward = useEngineStore((s) => s.stepForward);
@@ -34,7 +38,7 @@ export function DebugControls() {
         <select
           className="text-xs bg-gray-700 text-gray-200 border border-gray-600 rounded px-2 py-1 flex-1"
           onChange={(e) => {
-            const snippet = DEFAULT_SNIPPETS.find((s) => s.name === e.target.value);
+            const snippet = snippets.find((s) => s.name === e.target.value);
             if (snippet) {
               reset();
               setSourceCode(snippet.code);
@@ -45,7 +49,7 @@ export function DebugControls() {
           <option value="" disabled>
             {t('selectSnippet')}
           </option>
-          {DEFAULT_SNIPPETS.map((s) => (
+          {snippets.map((s) => (
             <option key={s.name} value={s.name}>
               {s.name}
             </option>

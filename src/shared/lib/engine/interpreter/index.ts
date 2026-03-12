@@ -8,6 +8,8 @@ export type {
   StackFrame,
   EnvironmentSnapshot,
   BindingSnapshot,
+  ClosureSnapshot,
+  HeapEnvironmentSnapshot,
   ValueNode,
   FunctionValue,
   WebApiEntry,

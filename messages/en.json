@@ -7,7 +7,8 @@
     "title": "JavaScript Engine Simulator",
     "subtitle": "Tokenizer → Parser → Interpreter · Step-by-Step Visualizer",
     "helpAriaLabel": "Help",
-    "goToEventSimulator": "Event Simulator"
+    "goToEventSimulator": "Event Simulator",
+    "goToClosureSimulator": "Closure Simulator"
   },
   "panels": {
     "codeEditor": "Code Editor",
@@ -17,7 +18,8 @@
     "webApis": "Web APIs",
     "taskQueue": "Task Queue",
     "microtaskQueue": "Microtask Queue",
-    "scope": "Scope"
+    "scope": "Scope",
+    "closures": "Closures"
   },
   "debugControls": {
     "example": "Example:",
@@ -39,7 +41,8 @@
     "taskQueue": "Task Queue is empty.",
     "microtaskQueue": "Microtask Queue is empty.",
     "tokenList": "No tokens yet. Write code and parse it.",
-    "astTree": "No AST yet. Parse your code first."
+    "astTree": "No AST yet. Parse your code first.",
+    "closures": "No closures detected."
   },
   "webApi": {
     "callback": "cb:",
@@ -53,6 +56,12 @@
     "line": "line {line}",
     "astTab": "AST",
     "scopeTab": "Scope"
+  },
+  "closurePanel": {
+    "alive": "alive",
+    "freed": "GC'd",
+    "capturedFrom": "captured from",
+    "memoryFreed": "memory freed"
   },
   "eventLoop": {
     "title": "Event Loop",
@@ -106,7 +115,8 @@
     "propagationPath": "Propagation Path",
     "console": "Console",
     "consoleEmpty": "Console output will appear here.",
-    "selectScenarioHint": "Select a scenario to begin."
+    "selectScenarioHint": "Select a scenario to begin.",
+    "goToClosureSimulator": "Closure Simulator"
   },
   "eventControls": {
     "scenario": "Scenario:",
@@ -140,6 +150,41 @@
       "stopImmediate": "stopImmediatePropagation() — Also prevents remaining listeners on the same node.",
       "preventDefault": "preventDefault() — Cancels the browser's default behavior (e.g., form submission).",
       "delegation": "Event Delegation — Attaching a single listener to a parent to handle child events."
+    }
+  },
+  "closureDashboard": {
+    "title": "Closure Simulator",
+    "subtitle": "Lexical Environment · Scope Chain · Memory Lifecycle",
+    "backToEngine": "← JS Engine",
+    "goToEventSimulator": "Event Simulator",
+    "helpAriaLabel": "Help"
+  },
+  "heapPanel": {
+    "title": "Heap Memory",
+    "onStack": "On Stack",
+    "retained": "Retained",
+    "collected": "GC'd",
+    "referencedBy": "ref by",
+    "outerRef": "[[Outer]]",
+    "emptyHeap": "No environments allocated yet."
+  },
+  "closureHelp": {
+    "title": "Closure Simulator — Help",
+    "about": {
+      "heading": "About",
+      "description": "This simulator visualizes how JavaScript closures work by showing the relationship between functions, their lexical environments, and memory lifecycle."
+    },
+    "concepts": {
+      "heading": "Key Concepts",
+      "lexicalEnv": "Lexical Environment — Each function creates an environment object that holds its local variables.",
+      "outerRef": "Outer Reference — Every environment has a [[Outer]] pointer to its parent, forming the scope chain.",
+      "lifecycle": "Memory Lifecycle — When a function returns, its environment stays in memory if a closure references it (retained). When no closures reference it, it becomes eligible for garbage collection."
+    },
+    "statuses": {
+      "heading": "Environment Statuses",
+      "active": "Active (green) — Currently on the call stack.",
+      "retained": "Retained (amber) — Off the stack but kept alive by a closure.",
+      "collected": "Collected (gray) — No references, eligible for GC."
     }
   },
   "eventPresets": {

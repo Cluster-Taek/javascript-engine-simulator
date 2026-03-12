@@ -281,3 +281,141 @@ console.log("2. Script end");
 `,
   },
 ];
+
+export const CLOSURE_SNIPPETS: CodeSnippet[] = [
+  {
+    name: 'Basic Closure',
+    code: `function outer() {
+  let x = 10;
+  function inner() {
+    return x;
+  }
+  return inner;
+}
+
+let fn = outer();
+let result = fn();
+console.log("result:", result);
+`,
+  },
+  {
+    name: 'Closure Memory',
+    code: `function makeCounter() {
+  let count = 0;
+  function increment() {
+    count++;
+    return count;
+  }
+  return increment;
+}
+
+let counter = makeCounter();
+let a = counter();
+let b = counter();
+console.log("count:", b);
+
+// counter still holds closure
+// count lives in memory
+counter = null;
+// now closure is freed!
+console.log("freed");
+`,
+  },
+  {
+    name: 'Closure in Loop',
+    code: `function createFunctions() {
+  let funcs = [];
+  for (let i = 0; i < 3; i++) {
+    let val = i;
+    funcs.push(() => val);
+  }
+  return funcs;
+}
+
+let fns = createFunctions();
+console.log("fn0:", fns[0]());
+console.log("fn1:", fns[1]());
+console.log("fn2:", fns[2]());
+`,
+  },
+  {
+    name: 'var Loop Problem',
+    code: `// var is function-scoped, not block-scoped
+// All closures share the SAME "i"
+function createFuncs() {
+  var funcs = [];
+  for (var i = 0; i < 4; i++) {
+    funcs.push(function() { return i; });
+  }
+  return funcs;
+}
+
+var fns = createFuncs();
+// All return 4 (the final value of i)
+console.log("fn0:", fns[0]());
+console.log("fn1:", fns[1]());
+console.log("fn2:", fns[2]());
+console.log("fn3:", fns[3]());
+`,
+  },
+  {
+    name: 'IIFE Fix',
+    code: `// Fix: wrap in IIFE to capture each value
+function createFuncs() {
+  var funcs = [];
+  for (var i = 0; i < 4; i++) {
+    (function(captured) {
+      funcs.push(function() { return captured; });
+    })(i);
+  }
+  return funcs;
+}
+
+var fns = createFuncs();
+console.log("fn0:", fns[0]());
+console.log("fn1:", fns[1]());
+console.log("fn2:", fns[2]());
+console.log("fn3:", fns[3]());
+`,
+  },
+  {
+    name: 'Shared Environment',
+    code: `function createPair() {
+  let shared = 0;
+  function increment() {
+    shared++;
+    return shared;
+  }
+  function decrement() {
+    shared--;
+    return shared;
+  }
+  return { increment: increment, decrement: decrement };
+}
+
+let pair = createPair();
+console.log("inc:", pair.increment());
+console.log("inc:", pair.increment());
+console.log("dec:", pair.decrement());
+console.log("inc:", pair.increment());
+`,
+  },
+  {
+    name: 'Surviving the Stack',
+    code: `function createGreeter(greeting) {
+  let count = 0;
+  function greet(name) {
+    count++;
+    return greeting + " " + name + " (#" + count + ")";
+  }
+  return greet;
+}
+
+let hello = createGreeter("Hello");
+let hi = createGreeter("Hi");
+console.log(hello("Alice"));
+console.log(hello("Bob"));
+console.log(hi("Charlie"));
+`,
+  },
+];

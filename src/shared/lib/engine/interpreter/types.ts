@@ -1,6 +1,11 @@
 import { type Environment } from './environment';
 import { type AstNode, type SourceLocation, type Statement, type BlockStatement } from '../parser/types';
 
+let functionIdCounter = 0;
+export function nextFunctionId(): string {
+  return `fn-${++functionIdCounter}`;
+}
+
 export type RuntimeValueKind =
   | 'number'
   | 'string'
@@ -38,6 +43,7 @@ export interface UndefinedValue {
 
 export interface FunctionValue {
   readonly kind: 'function';
+  readonly id: string;
   readonly name: string;
   readonly params: readonly string[];
   readonly body: BlockStatement;
@@ -115,6 +121,24 @@ export interface EnvironmentSnapshot {
   readonly bindings: readonly BindingSnapshot[];
 }
 
+export interface HeapEnvironmentSnapshot {
+  readonly id: string;
+  readonly label: string;
+  readonly bindings: readonly BindingSnapshot[];
+  readonly parentId: string | null;
+  readonly status: 'active' | 'retained' | 'collected';
+  readonly referencedByClosures: readonly string[];
+}
+
+export interface ClosureSnapshot {
+  readonly id: string;
+  readonly functionName: string;
+  readonly capturedEnvId: string;
+  readonly capturedEnvLabel: string;
+  readonly capturedVariables: readonly BindingSnapshot[];
+  readonly status: 'alive' | 'freed';
+}
+
 export interface StackFrame {
   readonly id: string;
   readonly name: string;
@@ -190,6 +214,8 @@ export interface StepResult {
   readonly callStack: readonly StackFrame[];
   readonly consoleOutput: readonly string[];
   readonly asyncSnapshot?: AsyncRuntimeSnapshot;
+  readonly closures: readonly ClosureSnapshot[];
+  readonly heapSnapshot?: readonly HeapEnvironmentSnapshot[];
 }
 
 export class EngineError extends Error {
