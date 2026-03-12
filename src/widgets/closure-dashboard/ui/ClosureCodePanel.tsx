@@ -76,7 +76,7 @@ export function ClosureCodePanel() {
         onMouseDown={onResizeStart}
       />
 
-      <DebugControls snippets={CLOSURE_SNIPPETS} />
+      <DebugControls snippets={CLOSURE_SNIPPETS} defaultSnippet={CLOSURE_SNIPPETS[0].name} />
       <Panel title={t('console')} className={editorHeight != null ? 'flex-1 min-h-0' : 'h-36 shrink-0'}>
         <ConsoleOutput />
       </Panel>

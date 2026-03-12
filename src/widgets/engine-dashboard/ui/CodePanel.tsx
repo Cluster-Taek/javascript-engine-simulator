@@ -6,6 +6,7 @@ import { TokenList } from '@/entities/token';
 import { CodeEditor } from '@/features/code-editor';
 import { ConsoleOutput } from '@/features/console-output';
 import { DebugControls } from '@/features/step-debugger';
+import { DEFAULT_SNIPPETS } from '@/shared/config';
 import { useEngineStore } from '@/shared/model';
 import { Panel } from '@/shared/ui/panel';
 
@@ -25,10 +26,7 @@ export function CodePanel() {
       isDragging.current = true;
       const startY = e.clientY;
       const startHeight =
-        editorHeight ??
-        containerRef.current?.querySelector<HTMLElement>('[data-editor-panel]')
-          ?.offsetHeight ??
-        300;
+        editorHeight ?? containerRef.current?.querySelector<HTMLElement>('[data-editor-panel]')?.offsetHeight ?? 300;
 
       const onMouseMove = (ev: MouseEvent) => {
         if (!isDragging.current) return;
@@ -69,16 +67,13 @@ export function CodePanel() {
         onMouseDown={onResizeStart}
       />
 
-      <DebugControls />
+      <DebugControls defaultSnippet={DEFAULT_SNIPPETS[0].name} />
       {tokens.length > 0 && (
         <Panel title={t('tokenStream')} className="max-h-40 shrink-0">
           <TokenList tokens={tokens} currentLine={currentLine} />
         </Panel>
       )}
-      <Panel
-        title={t('console')}
-        className={editorHeight != null ? 'flex-1 min-h-0' : 'h-36 shrink-0'}
-      >
+      <Panel title={t('console')} className={editorHeight != null ? 'flex-1 min-h-0' : 'h-36 shrink-0'}>
         <ConsoleOutput />
       </Panel>
     </div>

@@ -1,15 +1,17 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { VscDebugStepBack, VscDebugStepOver } from 'react-icons/vsc';
 import { DEFAULT_SNIPPETS, type CodeSnippet } from '@/shared/config';
 import { useEngineStore } from '@/shared/model';
 
 interface DebugControlsProps {
   snippets?: CodeSnippet[];
+  defaultSnippet?: string;
 }
 
-export function DebugControls({ snippets = DEFAULT_SNIPPETS }: DebugControlsProps) {
+export function DebugControls({ snippets = DEFAULT_SNIPPETS, defaultSnippet }: DebugControlsProps) {
   const t = useTranslations('debugControls');
   const status = useEngineStore((s) => s.executionStatus);
   const stepForward = useEngineStore((s) => s.stepForward);
@@ -23,6 +25,7 @@ export function DebugControls({ snippets = DEFAULT_SNIPPETS }: DebugControlsProp
   const currentStep = useEngineStore((s) => s.currentStep);
   const parseError = useEngineStore((s) => s.parseError);
   const stepIndex = useEngineStore((s) => s.stepIndex);
+  const [selectedSnippet, setSelectedSnippet] = useState(defaultSnippet ?? '');
 
   const isCompleted = status === 'completed';
   const isError = status === 'error';
@@ -40,11 +43,12 @@ export function DebugControls({ snippets = DEFAULT_SNIPPETS }: DebugControlsProp
           onChange={(e) => {
             const snippet = snippets.find((s) => s.name === e.target.value);
             if (snippet) {
+              setSelectedSnippet(snippet.name);
               reset();
               setSourceCode(snippet.code);
             }
           }}
-          defaultValue=""
+          value={selectedSnippet}
         >
           <option value="" disabled>
             {t('selectSnippet')}
