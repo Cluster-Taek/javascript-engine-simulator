@@ -200,6 +200,14 @@
       "collected": "Collected (gray) — No references, eligible for GC."
     }
   },
+  "snippetGroups": {
+    "basics": "Basics",
+    "dataAndControl": "Data & Control",
+    "asyncEventLoop": "Async / Event Loop",
+    "closureBasics": "Basic",
+    "loopClosures": "Loop Closures",
+    "closureAdvanced": "Advanced"
+  },
   "eventPresets": {
     "basicBubbling": "Basic Bubbling",
     "capturePhase": "Capture Phase",

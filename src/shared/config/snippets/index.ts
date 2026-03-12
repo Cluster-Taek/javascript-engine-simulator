@@ -3,10 +3,20 @@ export interface CodeSnippet {
   code: string;
 }
 
-export const DEFAULT_SNIPPETS: CodeSnippet[] = [
+export interface SnippetGroup {
+  labelKey: string;
+  snippets: CodeSnippet[];
+}
+
+// ── Default snippet groups (Engine Simulator) ──────────────────────
+
+export const DEFAULT_SNIPPET_GROUPS: SnippetGroup[] = [
   {
-    name: 'Fibonacci',
-    code: `function fibonacci(n) {
+    labelKey: 'basics',
+    snippets: [
+      {
+        name: 'Fibonacci',
+        code: `function fibonacci(n) {
   if (n <= 1) {
     return n;
   }
@@ -16,10 +26,10 @@ export const DEFAULT_SNIPPETS: CodeSnippet[] = [
 let result = fibonacci(6);
 console.log("fib(6) =", result);
 `,
-  },
-  {
-    name: 'Closure Counter',
-    code: `function makeCounter() {
+      },
+      {
+        name: 'Closure Counter',
+        code: `function makeCounter() {
   let count = 0;
   function increment() {
     count++;
@@ -34,10 +44,10 @@ let b = counter();
 let c = counter();
 console.log("count:", c);
 `,
-  },
-  {
-    name: 'Arrow Function',
-    code: `let double = (x) => x * 2;
+      },
+      {
+        name: 'Arrow Function',
+        code: `let double = (x) => x * 2;
 let add = (a, b) => a + b;
 
 function apply(fn, x, y) {
@@ -48,19 +58,19 @@ let result = apply(add, 3, 4);
 console.log("add:", result);
 console.log("double:", double(5));
 `,
-  },
-  {
-    name: 'For Loop',
-    code: `let sum = 0;
+      },
+      {
+        name: 'For Loop',
+        code: `let sum = 0;
 for (let i = 1; i <= 5; i++) {
   sum += i;
 }
 console.log("sum =", sum);
 `,
-  },
-  {
-    name: 'Scope Demo',
-    code: `let x = 10;
+      },
+      {
+        name: 'Scope Demo',
+        code: `let x = 10;
 
 function outer() {
   let y = 20;
@@ -74,10 +84,10 @@ function outer() {
 let result = outer();
 console.log("result:", result);
 `,
-  },
-  {
-    name: 'Conditional Logic',
-    code: `function classify(score) {
+      },
+      {
+        name: 'Conditional Logic',
+        code: `function classify(score) {
   if (score >= 90) {
     return "A";
   } else if (score >= 80) {
@@ -95,10 +105,15 @@ let passed = score >= 60 && grade !== "F";
 console.log("grade:", grade);
 console.log("passed:", passed);
 `,
+      },
+    ],
   },
   {
-    name: 'Math',
-    code: `let radius = 5;
+    labelKey: 'dataAndControl',
+    snippets: [
+      {
+        name: 'Math',
+        code: `let radius = 5;
 let area = Math.PI * Math.pow(radius, 2);
 console.log("area:", Math.round(area));
 
@@ -109,10 +124,10 @@ while (i < numbers.length) {
   i++;
 }
 `,
-  },
-  {
-    name: 'Array & Object',
-    code: `let arr = [1, 2, 3, 4, 5];
+      },
+      {
+        name: 'Array & Object',
+        code: `let arr = [1, 2, 3, 4, 5];
 let sum = 0;
 let i = 0;
 while (i < arr.length) {
@@ -124,10 +139,10 @@ let obj = { name: "JS Engine", version: 1 };
 console.log("sum:", sum);
 console.log("name:", obj.name);
 `,
-  },
-  {
-    name: 'Try/Catch',
-    code: `function divide(a, b) {
+      },
+      {
+        name: 'Try/Catch',
+        code: `function divide(a, b) {
   if (b === 0) {
     throw "Division by zero";
   }
@@ -145,10 +160,10 @@ try {
   console.log("cleanup done");
 }
 `,
-  },
-  {
-    name: 'Ternary Operator',
-    code: `function abs(n) {
+      },
+      {
+        name: 'Ternary Operator',
+        code: `function abs(n) {
   return n >= 0 ? n : -n;
 }
 
@@ -163,10 +178,15 @@ console.log("grade:", grade);
 let label = x > 0 ? "positive" : x < 0 ? "negative" : "zero";
 console.log("label:", label);
 `,
+      },
+    ],
   },
   {
-    name: 'setTimeout Demo',
-    code: `console.log("start");
+    labelKey: 'asyncEventLoop',
+    snippets: [
+      {
+        name: 'setTimeout Demo',
+        code: `console.log("start");
 
 setTimeout(function() {
   console.log("timeout callback");
@@ -174,10 +194,10 @@ setTimeout(function() {
 
 console.log("end");
 `,
-  },
-  {
-    name: 'Multiple Timers',
-    code: `console.log("first");
+      },
+      {
+        name: 'Multiple Timers',
+        code: `console.log("first");
 
 setTimeout(function() {
   console.log("timer A fired");
@@ -189,10 +209,10 @@ setTimeout(function() {
 
 console.log("last");
 `,
-  },
-  {
-    name: 'Microtask vs Macrotask',
-    code: `console.log("script start");
+      },
+      {
+        name: 'Microtask vs Macrotask',
+        code: `console.log("script start");
 
 setTimeout(function() {
   console.log("setTimeout");
@@ -208,10 +228,10 @@ queueMicrotask(function() {
 
 console.log("script end");
 `,
-  },
-  {
-    name: 'Promise Chain',
-    code: `console.log("1. Script start");
+      },
+      {
+        name: 'Promise Chain',
+        code: `console.log("1. Script start");
 
 Promise.resolve("hello").then(function(value) {
   console.log("3. Promise resolved:", value);
@@ -223,10 +243,10 @@ queueMicrotask(function() {
 
 console.log("2. Script end");
 `,
-  },
-  {
-    name: 'Fetch (async/await)',
-    code: `console.log("1. Script start");
+      },
+      {
+        name: 'Fetch (async/await)',
+        code: `console.log("1. Script start");
 
 async function fetchTestData() {
   console.log("2. Async function start (Sync execution)");
@@ -238,10 +258,10 @@ fetchTestData();
 
 console.log("3. Script end");
 `,
-  },
-  {
-    name: 'Multiple Await',
-    code: `console.log("start");
+      },
+      {
+        name: 'Multiple Await',
+        code: `console.log("start");
 
 async function fetchSequential() {
   const first = await fetch("https://api.example.com/first");
@@ -255,12 +275,12 @@ fetchSequential();
 
 console.log("main script end");
 `,
-  },
-  {
-    name: 'All Queues Demo',
-    code: `console.log("1. Script start");
+      },
+      {
+        name: 'All Queues Demo',
+        code: `console.log("1. Script start");
 
-// Web API → Task Queue (macrotask)
+// Web API \u2192 Task Queue (macrotask)
 setTimeout(function() {
   console.log("5. Task: setTimeout fires");
   queueMicrotask(function() {
@@ -279,13 +299,22 @@ queueMicrotask(function() {
 
 console.log("2. Script end");
 `,
+      },
+    ],
   },
 ];
 
-export const CLOSURE_SNIPPETS: CodeSnippet[] = [
+export const DEFAULT_SNIPPETS: CodeSnippet[] = DEFAULT_SNIPPET_GROUPS.flatMap((g) => g.snippets);
+
+// ── Closure snippet groups (Closure Simulator) ─────────────────────
+
+export const CLOSURE_SNIPPET_GROUPS: SnippetGroup[] = [
   {
-    name: 'Basic Closure',
-    code: `function outer() {
+    labelKey: 'closureBasics',
+    snippets: [
+      {
+        name: 'Basic Closure',
+        code: `function outer() {
   let x = 10;
   function inner() {
     return x;
@@ -297,10 +326,10 @@ let fn = outer();
 let result = fn();
 console.log("result:", result);
 `,
-  },
-  {
-    name: 'Closure Memory',
-    code: `function makeCounter() {
+      },
+      {
+        name: 'Closure Memory',
+        code: `function makeCounter() {
   let count = 0;
   function increment() {
     count++;
@@ -320,10 +349,15 @@ counter = null;
 // now closure is freed!
 console.log("freed");
 `,
+      },
+    ],
   },
   {
-    name: 'Closure in Loop',
-    code: `function createFunctions() {
+    labelKey: 'loopClosures',
+    snippets: [
+      {
+        name: 'Closure in Loop',
+        code: `function createFunctions() {
   let funcs = [];
   for (let i = 0; i < 3; i++) {
     let val = i;
@@ -337,10 +371,10 @@ console.log("fn0:", fns[0]());
 console.log("fn1:", fns[1]());
 console.log("fn2:", fns[2]());
 `,
-  },
-  {
-    name: 'var Loop Problem',
-    code: `// var is function-scoped, not block-scoped
+      },
+      {
+        name: 'var Loop Problem',
+        code: `// var is function-scoped, not block-scoped
 // All closures share the SAME "i"
 function createFuncs() {
   var funcs = [];
@@ -357,10 +391,10 @@ console.log("fn1:", fns[1]());
 console.log("fn2:", fns[2]());
 console.log("fn3:", fns[3]());
 `,
-  },
-  {
-    name: 'IIFE Fix',
-    code: `// Fix: wrap in IIFE to capture each value
+      },
+      {
+        name: 'IIFE Fix',
+        code: `// Fix: wrap in IIFE to capture each value
 function createFuncs() {
   var funcs = [];
   for (var i = 0; i < 4; i++) {
@@ -377,10 +411,15 @@ console.log("fn1:", fns[1]());
 console.log("fn2:", fns[2]());
 console.log("fn3:", fns[3]());
 `,
+      },
+    ],
   },
   {
-    name: 'Shared Environment',
-    code: `function createPair() {
+    labelKey: 'closureAdvanced',
+    snippets: [
+      {
+        name: 'Shared Environment',
+        code: `function createPair() {
   let shared = 0;
   function increment() {
     shared++;
@@ -399,10 +438,10 @@ console.log("inc:", pair.increment());
 console.log("dec:", pair.decrement());
 console.log("inc:", pair.increment());
 `,
-  },
-  {
-    name: 'Surviving the Stack',
-    code: `function createGreeter(greeting) {
+      },
+      {
+        name: 'Surviving the Stack',
+        code: `function createGreeter(greeting) {
   let count = 0;
   function greet(name) {
     count++;
@@ -417,5 +456,9 @@ console.log(hello("Alice"));
 console.log(hello("Bob"));
 console.log(hi("Charlie"));
 `,
+      },
+    ],
   },
 ];
+
+export const CLOSURE_SNIPPETS: CodeSnippet[] = CLOSURE_SNIPPET_GROUPS.flatMap((g) => g.snippets);

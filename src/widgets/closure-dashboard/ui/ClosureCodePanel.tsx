@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@/features/code-editor';
 import { ConsoleOutput } from '@/features/console-output';
 import { DebugControls } from '@/features/step-debugger';
-import { CLOSURE_SNIPPETS } from '@/shared/config';
+import { CLOSURE_SNIPPET_GROUPS, CLOSURE_SNIPPETS } from '@/shared/config';
 import { useEngineStore } from '@/shared/model';
 import { Panel } from '@/shared/ui/panel';
 
@@ -76,7 +76,7 @@ export function ClosureCodePanel() {
         onMouseDown={onResizeStart}
       />
 
-      <DebugControls snippets={CLOSURE_SNIPPETS} defaultSnippet={CLOSURE_SNIPPETS[0].name} />
+      <DebugControls snippetGroups={CLOSURE_SNIPPET_GROUPS} defaultSnippet={CLOSURE_SNIPPETS[0].name} />
       <Panel title={t('console')} className={editorHeight != null ? 'flex-1 min-h-0' : 'h-36 shrink-0'}>
         <ConsoleOutput />
       </Panel>

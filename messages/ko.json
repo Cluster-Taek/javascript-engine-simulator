@@ -200,6 +200,14 @@
       "collected": "해제 (회색) — 참조가 없어 GC 대상입니다."
     }
   },
+  "snippetGroups": {
+    "basics": "\uae30\ubcf8",
+    "dataAndControl": "\ub370\uc774\ud130\uc640 \uc81c\uc5b4",
+    "asyncEventLoop": "\ube44\ub3d9\uae30 / \uc774\ubca4\ud2b8 \ub8e8\ud504",
+    "closureBasics": "\uae30\ubcf8",
+    "loopClosures": "\ub8e8\ud504 \ud074\ub85c\uc800",
+    "closureAdvanced": "\uace0\uae09"
+  },
   "eventPresets": {
     "basicBubbling": "기본 버블링",
     "capturePhase": "캡처 단계",
