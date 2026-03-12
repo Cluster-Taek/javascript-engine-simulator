@@ -1,20 +1,29 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useCallback, useRef, useState } from 'react';
-import { TokenList } from '@/entities/token';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@/features/code-editor';
 import { ConsoleOutput } from '@/features/console-output';
 import { DebugControls } from '@/features/step-debugger';
-import { DEFAULT_SNIPPETS } from '@/shared/config';
+import { CLOSURE_SNIPPET_GROUPS, CLOSURE_SNIPPETS } from '@/shared/config';
 import { useEngineStore } from '@/shared/model';
 import { Panel } from '@/shared/ui/panel';
 
-export function CodePanel() {
+export function ClosureCodePanel() {
   const t = useTranslations('panels');
-  const tokens = useEngineStore((s) => s.tokens);
-  const currentLine = useEngineStore((s) => s.currentLine);
   const status = useEngineStore((s) => s.executionStatus);
+  const reset = useEngineStore((s) => s.reset);
+  const setSourceCode = useEngineStore((s) => s.setSourceCode);
+
+  // Load first closure snippet on mount
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (!initialized.current) {
+      initialized.current = true;
+      reset();
+      setSourceCode(CLOSURE_SNIPPETS[0].code);
+    }
+  }, [reset, setSourceCode]);
 
   const [editorHeight, setEditorHeight] = useState<number | null>(null);
   const isDragging = useRef(false);
@@ -67,12 +76,7 @@ export function CodePanel() {
         onMouseDown={onResizeStart}
       />
 
-      <DebugControls defaultSnippet={DEFAULT_SNIPPETS[0].name} />
-      {tokens.length > 0 && (
-        <Panel title={t('tokenStream')} className="max-h-40 shrink-0">
-          <TokenList tokens={tokens} currentLine={currentLine} />
-        </Panel>
-      )}
+      <DebugControls snippetGroups={CLOSURE_SNIPPET_GROUPS} defaultSnippet={CLOSURE_SNIPPETS[0].name} />
       <Panel title={t('console')} className={editorHeight != null ? 'flex-1 min-h-0' : 'h-36 shrink-0'}>
         <ConsoleOutput />
       </Panel>

@@ -1,12 +1,20 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import { VscDebugStepBack, VscDebugStepOver } from 'react-icons/vsc';
-import { DEFAULT_SNIPPETS } from '@/shared/config';
+import { DEFAULT_SNIPPET_GROUPS, type CodeSnippet, type SnippetGroup } from '@/shared/config';
 import { useEngineStore } from '@/shared/model';
 
-export function DebugControls() {
+interface DebugControlsProps {
+  snippetGroups?: SnippetGroup[];
+  snippets?: CodeSnippet[];
+  defaultSnippet?: string;
+}
+
+export function DebugControls({ snippetGroups, snippets, defaultSnippet }: DebugControlsProps) {
   const t = useTranslations('debugControls');
+  const tGroups = useTranslations('snippetGroups');
   const status = useEngineStore((s) => s.executionStatus);
   const stepForward = useEngineStore((s) => s.stepForward);
   const stepBack = useEngineStore((s) => s.stepBack);
@@ -19,6 +27,9 @@ export function DebugControls() {
   const currentStep = useEngineStore((s) => s.currentStep);
   const parseError = useEngineStore((s) => s.parseError);
   const stepIndex = useEngineStore((s) => s.stepIndex);
+  const resolvedGroups = snippetGroups ?? (snippets ? undefined : DEFAULT_SNIPPET_GROUPS);
+  const resolvedSnippets = snippets ?? resolvedGroups?.flatMap((g) => g.snippets) ?? [];
+  const [selectedSnippet, setSelectedSnippet] = useState(defaultSnippet ?? '');
 
   const isCompleted = status === 'completed';
   const isError = status === 'error';
@@ -34,22 +45,33 @@ export function DebugControls() {
         <select
           className="text-xs bg-gray-700 text-gray-200 border border-gray-600 rounded px-2 py-1 flex-1"
           onChange={(e) => {
-            const snippet = DEFAULT_SNIPPETS.find((s) => s.name === e.target.value);
+            const snippet = resolvedSnippets.find((s) => s.name === e.target.value);
             if (snippet) {
+              setSelectedSnippet(snippet.name);
               reset();
               setSourceCode(snippet.code);
             }
           }}
-          defaultValue=""
+          value={selectedSnippet}
         >
           <option value="" disabled>
             {t('selectSnippet')}
           </option>
-          {DEFAULT_SNIPPETS.map((s) => (
-            <option key={s.name} value={s.name}>
-              {s.name}
-            </option>
-          ))}
+          {resolvedGroups
+            ? resolvedGroups.map((group) => (
+                <optgroup key={group.labelKey} label={tGroups(group.labelKey)}>
+                  {group.snippets.map((s) => (
+                    <option key={s.name} value={s.name}>
+                      {s.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))
+            : resolvedSnippets.map((s) => (
+                <option key={s.name} value={s.name}>
+                  {s.name}
+                </option>
+              ))}
         </select>
       </div>
 

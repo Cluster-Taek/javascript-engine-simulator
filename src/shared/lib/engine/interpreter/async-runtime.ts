@@ -2,6 +2,7 @@ import { Environment, createGlobalEnvironment, runtimeValueToString } from './en
 import { interpret } from './interpreter';
 import {
   AwaitSignal,
+  nextFunctionId,
   type RuntimeValue,
   type StepResult,
   type FunctionValue,
@@ -334,6 +335,7 @@ export class AsyncRuntime {
         callStack: [],
         consoleOutput: [...this.consoleOutput],
         asyncSnapshot: makeAsyncSnapshot(this.webApis, this.taskQueue, this.microtaskQueue, 'idle'),
+        closures: [],
       };
     }
 
@@ -372,6 +374,7 @@ export class AsyncRuntime {
           callStack: [],
           consoleOutput: [...this.consoleOutput],
           asyncSnapshot: makeAsyncSnapshot(this.webApis, this.taskQueue, this.microtaskQueue, this.eventLoopPhase),
+          closures: [],
         };
       }
 
@@ -395,6 +398,7 @@ export class AsyncRuntime {
           callStack: [],
           consoleOutput: [...this.consoleOutput],
           asyncSnapshot: makeAsyncSnapshot(this.webApis, this.taskQueue, this.microtaskQueue, this.eventLoopPhase),
+          closures: [],
         };
       }
 
@@ -411,6 +415,7 @@ export class AsyncRuntime {
           callStack: [],
           consoleOutput: [...this.consoleOutput],
           asyncSnapshot: makeAsyncSnapshot(this.webApis, this.taskQueue, this.microtaskQueue, this.eventLoopPhase),
+          closures: [],
         };
 
         // Execute the microtask callback
@@ -430,6 +435,7 @@ export class AsyncRuntime {
           callStack: [],
           consoleOutput: [...this.consoleOutput],
           asyncSnapshot: makeAsyncSnapshot(this.webApis, this.taskQueue, this.microtaskQueue, this.eventLoopPhase),
+          closures: [],
         };
 
         yield* this.executeCallback(task, env);
@@ -446,6 +452,8 @@ export class AsyncRuntime {
       callStack: [],
       consoleOutput: [...this.consoleOutput],
       asyncSnapshot: makeAsyncSnapshot(this.webApis, this.taskQueue, this.microtaskQueue, 'idle'),
+      closures: [],
+      heapSnapshot: [],
     };
 
     return { kind: 'undefined' };
@@ -489,6 +497,7 @@ export class AsyncRuntime {
           };
           const nextContinuation: FunctionValue = {
             kind: 'function',
+            id: nextFunctionId(),
             name: '<continuation>',
             params: e.variableName ? [e.variableName] : [],
             body: continuationBody,

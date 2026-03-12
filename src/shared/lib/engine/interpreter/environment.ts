@@ -140,6 +140,14 @@ export class Environment {
   getLabel(): string {
     return this.label;
   }
+
+  getParent(): Environment | null {
+    return this.parent;
+  }
+
+  getBindingsMap(): ReadonlyMap<string, Binding> {
+    return this.bindings;
+  }
 }
 
 export function runtimeValueToString(value: RuntimeValue): string {

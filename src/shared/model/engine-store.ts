@@ -4,6 +4,8 @@ import {
   type StepResult,
   type EnvironmentSnapshot,
   type StackFrame,
+  type ClosureSnapshot,
+  type HeapEnvironmentSnapshot,
   type WebApiEntry,
   type QueueEntry,
   type EventLoopPhase,
@@ -35,6 +37,10 @@ interface EngineState {
   executionSpeed: number;
   intervalId: ReturnType<typeof setInterval> | null;
   breakpoints: Set<number>;
+  // Closure tracking
+  closures: readonly ClosureSnapshot[];
+  // Heap snapshot
+  heapSnapshot: readonly HeapEnvironmentSnapshot[];
   // Async runtime state
   webApis: WebApiEntry[];
   taskQueue: QueueEntry[];
@@ -86,6 +92,8 @@ const initialState: EngineState = {
   executionSpeed: 500,
   intervalId: null,
   breakpoints: new Set(),
+  closures: [],
+  heapSnapshot: [],
   webApis: [],
   taskQueue: [],
   microtaskQueue: [],
@@ -140,6 +148,8 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
       currentAstNodeId: null,
       intervalId: null,
       breakpoints: new Set(),
+      closures: [],
+      heapSnapshot: [],
       webApis: [],
       taskQueue: [],
       microtaskQueue: [],
@@ -166,6 +176,8 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
         callStack: step.callStack,
         environments: step.environments,
         consoleOutput: [...step.consoleOutput],
+        closures: step.closures,
+        heapSnapshot: step.heapSnapshot ?? [],
         currentLine: step.loc?.start.line ?? null,
         executionStatus: executionStatus === 'running' ? 'running' : 'paused',
         ...(asyncSnapshot
@@ -223,6 +235,8 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
         callStack: step.callStack,
         environments: step.environments,
         consoleOutput: [...step.consoleOutput],
+        closures: step.closures,
+        heapSnapshot: step.heapSnapshot ?? [],
         currentLine: step.loc?.start.line ?? null,
         executionStatus: executionStatus === 'running' ? 'running' : 'paused',
         ...(asyncSnapshot
@@ -317,6 +331,8 @@ export const engineStore = createStore<EngineStore>()((set, get) => ({
       callStack: step.callStack,
       environments: step.environments,
       consoleOutput: [...step.consoleOutput],
+      closures: step.closures,
+      heapSnapshot: step.heapSnapshot ?? [],
       currentLine: step.loc?.start.line ?? null,
       executionStatus: executionStatus === 'completed' || executionStatus === 'error' ? 'paused' : executionStatus,
       ...(asyncSnapshot

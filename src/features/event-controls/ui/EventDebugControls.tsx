@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useEffect, useRef } from 'react';
 import { VscDebugStepBack, VscDebugStepOver } from 'react-icons/vsc';
 import { EVENT_PRESETS } from '@/shared/config';
 import { useEventStore } from '@/shared/model';
@@ -19,6 +20,15 @@ export function EventDebugControls() {
   const currentStep = useEventStore((s) => s.currentStep);
   const stepIndex = useEventStore((s) => s.stepIndex);
   const currentScenario = useEventStore((s) => s.currentScenario);
+
+  // Load first preset on mount
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (!initialized.current) {
+      initialized.current = true;
+      loadScenario(EVENT_PRESETS[0]);
+    }
+  }, [loadScenario]);
 
   const isCompleted = status === 'completed';
   const isRunning = status === 'running';

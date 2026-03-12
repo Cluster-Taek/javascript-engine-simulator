@@ -6,12 +6,12 @@ import { FiHelpCircle } from 'react-icons/fi';
 import { LanguageSwitcher } from '@/features/language-switcher';
 import { SimulatorNav } from '@/features/simulator-nav';
 import { ResizableSplit } from '@/shared/ui/resizable-split';
-import { DomTreePanel } from './DomTreePanel';
-import { EventHelpModal } from './EventHelpModal';
-import { PropagationPanel } from './PropagationPanel';
+import { ClosureCodePanel } from './ClosureCodePanel';
+import { ClosureHelpModal } from './ClosureHelpModal';
+import { ClosureVisualizationPanel } from './ClosureVisualizationPanel';
 
-export function EventDashboard() {
-  const t = useTranslations('eventDashboard');
+export function ClosureDashboard() {
+  const t = useTranslations('closureDashboard');
   const [helpOpen, setHelpOpen] = useState(false);
 
   return (
@@ -20,7 +20,7 @@ export function EventDashboard() {
       <header className="flex items-center gap-3 px-4 py-2 bg-gray-900 border-b border-gray-800 shrink-0">
         <SimulatorNav />
         <div className="flex items-center gap-2">
-          <span className="text-lg">🎯</span>
+          <span className="text-lg">🔒</span>
           <h1 className="text-sm font-bold text-gray-100">{t('title')}</h1>
         </div>
         <span className="text-xs text-gray-500 flex-1">{t('subtitle')}</span>
@@ -33,13 +33,13 @@ export function EventDashboard() {
           <FiHelpCircle size={18} />
         </button>
       </header>
-      <EventHelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+      <ClosureHelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
 
       {/* Main content */}
       <div className="flex-1 min-h-0">
         <ResizableSplit
-          left={<DomTreePanel />}
-          right={<PropagationPanel />}
+          left={<ClosureCodePanel />}
+          right={<ClosureVisualizationPanel />}
           initialLeftPercent={40}
           className="h-full"
         />

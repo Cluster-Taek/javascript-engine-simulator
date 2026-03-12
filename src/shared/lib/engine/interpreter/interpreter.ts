@@ -1,6 +1,23 @@
 import { Environment, runtimeValueToString } from './environment';
-import { RuntimeError, ReturnSignal, BreakSignal, ContinueSignal, AwaitSignal, ThrowSignal } from './types';
-import { type RuntimeValue, type StepResult, type StackFrame, type FunctionValue, type PromiseValue } from './types';
+import {
+  RuntimeError,
+  ReturnSignal,
+  BreakSignal,
+  ContinueSignal,
+  AwaitSignal,
+  ThrowSignal,
+  nextFunctionId,
+} from './types';
+import {
+  type RuntimeValue,
+  type StepResult,
+  type StackFrame,
+  type FunctionValue,
+  type PromiseValue,
+  type ClosureSnapshot,
+  type BindingSnapshot,
+  type HeapEnvironmentSnapshot,
+} from './types';
 import {
   type Program,
   type Statement,
@@ -63,6 +80,162 @@ function isTruthy(value: RuntimeValue): boolean {
 export function* interpret(program: Program, globalEnv: Environment): Generator<StepResult, RuntimeValue, void> {
   const callStack: StackFrame[] = [];
   const consoleOutput: string[] = [];
+  const envStack: Environment[] = [globalEnv];
+
+  // Environment registry for heap snapshot
+  const environmentRegistry = new Map<string, Environment>();
+  environmentRegistry.set(globalEnv.getId(), globalEnv);
+
+  // Track function call counts for label disambiguation
+  const fnCallCountMap = new Map<string, number>();
+
+  function createTrackedEnv(label: string, parent: Environment | null): Environment {
+    const env = new Environment(label, parent);
+    environmentRegistry.set(env.getId(), env);
+    return env;
+  }
+
+  function createFnEnv(name: string, prefix: 'function' | 'new', parent: Environment | null): Environment {
+    const count = (fnCallCountMap.get(name) ?? 0) + 1;
+    fnCallCountMap.set(name, count);
+    return createTrackedEnv(`${prefix}:${name} #${count}`, parent);
+  }
+
+  // Closure tracking
+  interface ClosureEntry {
+    id: string;
+    functionName: string;
+    capturedEnv: Environment;
+  }
+  const closureRegistry = new Map<string, ClosureEntry>();
+
+  function registerClosure(fn: FunctionValue): void {
+    // Only track closures that capture non-global scopes
+    if (fn.closure.getLabel() === 'global' || fn.closure.getLabel() === '__global__') return;
+    closureRegistry.set(fn.id, {
+      id: fn.id,
+      functionName: fn.name,
+      capturedEnv: fn.closure,
+    });
+  }
+
+  function collectReachableFnIds(): Set<string> {
+    const visitedEnvs = new Set<string>();
+    const fnIds = new Set<string>();
+
+    function walkEnv(e: Environment): void {
+      if (visitedEnvs.has(e.getId())) return;
+      visitedEnvs.add(e.getId());
+
+      for (const [, binding] of e.getBindingsMap()) {
+        if (binding.builtin) continue;
+        walkValue(binding.value);
+      }
+
+      const parent = e.getParent();
+      if (parent) walkEnv(parent);
+    }
+
+    function walkValue(v: RuntimeValue): void {
+      if (v.kind === 'function') {
+        if (!fnIds.has(v.id)) {
+          fnIds.add(v.id);
+          walkEnv(v.closure);
+        }
+      } else if (v.kind === 'array') {
+        for (const el of v.elements) walkValue(el);
+      } else if (v.kind === 'object') {
+        for (const [, val] of v.properties) walkValue(val);
+      } else if (v.kind === 'promise') {
+        for (const cb of v.thenCallbacks) {
+          if (cb.onFulfilled?.kind === 'function') walkValue(cb.onFulfilled);
+        }
+      }
+    }
+
+    for (const env of envStack) {
+      walkEnv(env);
+    }
+
+    return fnIds;
+  }
+
+  function buildClosureSnapshots(): readonly ClosureSnapshot[] {
+    if (closureRegistry.size === 0) return [];
+    const reachable = collectReachableFnIds();
+    const snapshots: ClosureSnapshot[] = [];
+
+    for (const [fnId, entry] of closureRegistry) {
+      const envSnap = entry.capturedEnv.snapshot();
+      const capturedVars: readonly BindingSnapshot[] = envSnap.bindings;
+      snapshots.push({
+        id: entry.id,
+        functionName: entry.functionName,
+        capturedEnvId: envSnap.id,
+        capturedEnvLabel: envSnap.label,
+        capturedVariables: capturedVars,
+        status: reachable.has(fnId) ? 'alive' : 'freed',
+      });
+    }
+
+    return snapshots;
+  }
+
+  function buildHeapSnapshot(): readonly HeapEnvironmentSnapshot[] {
+    if (environmentRegistry.size === 0) return [];
+
+    // Collect active env IDs (currently on envStack)
+    const activeEnvIds = new Set<string>();
+    for (const env of envStack) {
+      activeEnvIds.add(env.getId());
+    }
+
+    // Collect retained env IDs (referenced by REACHABLE closures only)
+    const reachableFnIds = collectReachableFnIds();
+    const retainedEnvIds = new Map<string, string[]>(); // envId -> functionNames[]
+
+    for (const [fnId, entry] of closureRegistry) {
+      // Only walk env chains of alive closures (skip freed ones)
+      if (!reachableFnIds.has(fnId)) continue;
+      let env: Environment | null = entry.capturedEnv;
+      while (env) {
+        const envId = env.getId();
+        if (!retainedEnvIds.has(envId)) {
+          retainedEnvIds.set(envId, []);
+        }
+        retainedEnvIds.get(envId)!.push(entry.functionName);
+        env = env.getParent();
+      }
+    }
+
+    const snapshots: HeapEnvironmentSnapshot[] = [];
+    for (const [envId, env] of environmentRegistry) {
+      const envSnap = env.snapshot();
+      let status: 'active' | 'retained' | 'collected';
+      let referencedByClosures: string[] = [];
+
+      if (activeEnvIds.has(envId)) {
+        status = 'active';
+        referencedByClosures = retainedEnvIds.get(envId) ?? [];
+      } else if (retainedEnvIds.has(envId)) {
+        status = 'retained';
+        referencedByClosures = retainedEnvIds.get(envId)!;
+      } else {
+        status = 'collected';
+      }
+
+      snapshots.push({
+        id: envSnap.id,
+        label: envSnap.label,
+        bindings: envSnap.bindings,
+        parentId: env.getParent()?.getId() ?? null,
+        status,
+        referencedByClosures,
+      });
+    }
+
+    return snapshots;
+  }
 
   const globalFrame: StackFrame = {
     id: nextFrameId(),
@@ -88,6 +261,8 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       environments: env.snapshotChain(),
       callStack: [...callStack],
       consoleOutput: [...consoleOutput],
+      closures: buildClosureSnapshots(),
+      heapSnapshot: buildHeapSnapshot(),
     };
   }
 
@@ -156,14 +331,16 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     // Hoist function declarations first (var-like semantics)
     for (const stmt of body) {
       if (stmt.type === 'FunctionDeclaration') {
-        const fnVal: RuntimeValue = {
+        const fnVal: FunctionValue = {
           kind: 'function',
+          id: nextFunctionId(),
           name: stmt.id.name,
           params: stmt.params.map((p) => p.name),
           body: stmt.body,
           closure: env,
           async: stmt.async,
         };
+        registerClosure(fnVal);
         env.declare(stmt.id.name, 'var', fnVal);
       }
     }
@@ -215,7 +392,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       case 'ForStatement':
         return yield* executeForStatement(stmt, env);
       case 'BlockStatement':
-        return yield* executeBlock(stmt.body, new Environment('block', env));
+        return yield* executeBlock(stmt.body, createTrackedEnv('block', env));
       case 'ExpressionStatement':
         return yield* executeExpressionStatement(stmt, env);
       case 'TryStatement':
@@ -293,12 +470,12 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     );
 
     if (isTruthy(testVal)) {
-      return yield* executeBlock(stmt.consequent.body, new Environment('if-then', env));
+      return yield* executeBlock(stmt.consequent.body, createTrackedEnv('if-then', env));
     } else if (stmt.alternate !== null) {
       if (stmt.alternate.type === 'IfStatement') {
         return yield* executeIfStatement(stmt.alternate, env);
       }
-      return yield* executeBlock(stmt.alternate.body, new Environment('if-else', env));
+      return yield* executeBlock(stmt.alternate.body, createTrackedEnv('if-else', env));
     }
     return { kind: 'undefined' };
   }
@@ -318,7 +495,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       if (!isTruthy(testVal)) break;
 
       try {
-        yield* executeBlock(stmt.body.body, new Environment('while-body', env));
+        yield* executeBlock(stmt.body.body, createTrackedEnv('while-body', env));
       } catch (e) {
         if (e instanceof BreakSignal) break;
         if (e instanceof ContinueSignal) continue;
@@ -329,7 +506,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
   }
 
   function* executeForStatement(stmt: ForStatement, env: Environment): Generator<StepResult, RuntimeValue, void> {
-    const loopEnv = new Environment('for-init', env);
+    const loopEnv = createTrackedEnv('for-init', env);
     let iterations = 0;
     const MAX_ITERATIONS = 1000;
 
@@ -365,7 +542,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       // For let/const, create a per-iteration env with a copy of loop variables
       let iterationEnv = loopEnv;
       if (isBlockScoped && blockScopedVars.length > 0) {
-        iterationEnv = new Environment('for-iteration', env);
+        iterationEnv = createTrackedEnv('for-iteration', env);
         for (const varName of blockScopedVars) {
           const currentVal = loopEnv.resolve(varName);
           iterationEnv.declare(varName, 'let', currentVal);
@@ -373,7 +550,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       }
 
       try {
-        yield* executeBlock(stmt.body.body, new Environment('for-body', iterationEnv));
+        yield* executeBlock(stmt.body.body, createTrackedEnv('for-body', iterationEnv));
       } catch (e) {
         if (e instanceof BreakSignal) break;
         if (e instanceof ContinueSignal) {
@@ -413,7 +590,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     let caughtError: RuntimeValue | null = null;
 
     try {
-      result = yield* executeBlock(stmt.block.body, new Environment('try', env));
+      result = yield* executeBlock(stmt.block.body, createTrackedEnv('try', env));
     } catch (e) {
       if (e instanceof ThrowSignal) {
         caughtError = e.value;
@@ -427,7 +604,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       ) {
         if (stmt.finalizer) {
           yield createStep('finally-enter', 'Entering finally block', env, stmt);
-          yield* executeBlock(stmt.finalizer.body, new Environment('finally', env));
+          yield* executeBlock(stmt.finalizer.body, createTrackedEnv('finally', env));
         }
         throw e;
       } else {
@@ -436,7 +613,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     }
 
     if (caughtError !== null && stmt.handler !== null) {
-      const catchEnv = new Environment('catch', env);
+      const catchEnv = createTrackedEnv('catch', env);
       if (stmt.handler.param) {
         catchEnv.declare(stmt.handler.param.name, 'let', caughtError);
       }
@@ -445,14 +622,14 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     } else if (caughtError !== null) {
       if (stmt.finalizer) {
         yield createStep('finally-enter', 'Entering finally block', env, stmt);
-        yield* executeBlock(stmt.finalizer.body, new Environment('finally', env));
+        yield* executeBlock(stmt.finalizer.body, createTrackedEnv('finally', env));
       }
       throw new ThrowSignal(caughtError);
     }
 
     if (stmt.finalizer) {
       yield createStep('finally-enter', 'Entering finally block', env, stmt);
-      yield* executeBlock(stmt.finalizer.body, new Environment('finally', env));
+      yield* executeBlock(stmt.finalizer.body, createTrackedEnv('finally', env));
     }
 
     return result;
@@ -527,14 +704,16 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
 
       // FunctionDeclaration used as expression (arrow fn placeholder)
       case 'FunctionDeclaration': {
-        const fnVal: RuntimeValue = {
+        const fnVal: FunctionValue = {
           kind: 'function',
+          id: nextFunctionId(),
           name: expr.id.name,
           params: expr.params.map((p) => p.name),
           body: expr.body,
           closure: env,
           async: expr.async,
         };
+        registerClosure(fnVal);
         return fnVal;
       }
 
@@ -552,14 +731,16 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
                   } as ReturnStatement,
                 ],
               };
-        const fnVal: RuntimeValue = {
+        const fnVal: FunctionValue = {
           kind: 'function',
+          id: nextFunctionId(),
           name: '<arrow>',
           params: expr.params.map((p) => p.name),
           body,
           closure: env,
           async: expr.async,
         };
+        registerClosure(fnVal);
         return fnVal;
       }
 
@@ -573,7 +754,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
           return callee.call(args);
         }
         if (callee.kind === 'function') {
-          const fnEnv = new Environment(`new:${callee.name}`, callee.closure);
+          const fnEnv = createFnEnv(callee.name, 'new', callee.closure);
           for (let i = 0; i < callee.params.length; i++) {
             fnEnv.declare(callee.params[i], 'let', args[i] ?? { kind: 'undefined' });
           }
@@ -584,6 +765,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
             environmentSnapshot: fnEnv.snapshot(),
           };
           callStack.push(frame);
+          envStack.push(fnEnv);
           yield createStep(
             'enter-function',
             `new ${callee.name}(${args.map(runtimeValueToString).join(', ')})`,
@@ -595,10 +777,12 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
           } catch (e) {
             if (!(e instanceof ReturnSignal)) {
               callStack.pop();
+              envStack.pop();
               throw e;
             }
           }
           callStack.pop();
+          envStack.pop();
           yield createStep('exit-function', `new ${callee.name} constructed`, env, expr);
           return { kind: 'undefined' };
         }
@@ -888,7 +1072,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         thenCallbacks: [],
       };
 
-      const fnEnv = new Environment(`function:${callee.name}`, callee.closure);
+      const fnEnv = createFnEnv(callee.name, 'function', callee.closure);
       for (let i = 0; i < callee.params.length; i++) {
         fnEnv.declare(callee.params[i], 'let', args[i] ?? { kind: 'undefined' });
       }
@@ -900,6 +1084,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         environmentSnapshot: fnEnv.snapshot(),
       };
       callStack.push(asyncFrame);
+      envStack.push(fnEnv);
 
       yield createStep(
         'enter-function',
@@ -924,6 +1109,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
 
           const continuation: FunctionValue = {
             kind: 'function',
+            id: nextFunctionId(),
             name: `<continuation:${callee.name}>`,
             params: e.variableName ? [e.variableName] : [],
             body: continuationBody,
@@ -933,6 +1119,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
           e.promise.thenCallbacks.push({ onFulfilled: continuation });
 
           callStack.pop();
+          envStack.pop();
           yield createStep(
             'exit-function',
             `Async function ${callee.name} suspended at await`,
@@ -946,17 +1133,19 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
           asyncPromise.value = e.value;
         } else {
           callStack.pop();
+          envStack.pop();
           throw e;
         }
       }
 
       callStack.pop();
+      envStack.pop();
       yield createStep('exit-function', `Async function ${callee.name} completed`, env, expr, asyncPromise);
       return asyncPromise;
     }
 
     // Regular (sync) function handling
-    const fnEnv = new Environment(`function:${callee.name}`, callee.closure);
+    const fnEnv = createFnEnv(callee.name, 'function', callee.closure);
     for (let i = 0; i < callee.params.length; i++) {
       fnEnv.declare(callee.params[i], 'let', args[i] ?? { kind: 'undefined' });
     }
@@ -968,6 +1157,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       environmentSnapshot: fnEnv.snapshot(),
     };
     callStack.push(frame);
+    envStack.push(fnEnv);
 
     yield createStep(
       'enter-function',
@@ -984,11 +1174,13 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         returnValue = e.value;
       } else {
         callStack.pop();
+        envStack.pop();
         throw e;
       }
     }
 
     callStack.pop();
+    envStack.pop();
     yield createStep(
       'exit-function',
       `Function ${callee.name} returned: ${runtimeValueToString(returnValue)}`,
