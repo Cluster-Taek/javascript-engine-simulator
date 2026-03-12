@@ -333,6 +333,20 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     let iterations = 0;
     const MAX_ITERATIONS = 1000;
 
+    // Determine if the init uses let/const (requires per-iteration copy)
+    const isBlockScoped =
+      stmt.init !== null &&
+      stmt.init.type === 'VariableDeclaration' &&
+      (stmt.init.kind === 'let' || stmt.init.kind === 'const');
+
+    // Collect block-scoped variable names for per-iteration copy
+    const blockScopedVars: string[] = [];
+    if (isBlockScoped && stmt.init !== null && stmt.init.type === 'VariableDeclaration') {
+      for (const decl of stmt.init.declarations) {
+        blockScopedVars.push(decl.id.name);
+      }
+    }
+
     if (stmt.init !== null) {
       yield* executeStatement(stmt.init, loopEnv);
     }
@@ -348,14 +362,32 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         if (!isTruthy(testVal)) break;
       }
 
+      // For let/const, create a per-iteration env with a copy of loop variables
+      let iterationEnv = loopEnv;
+      if (isBlockScoped && blockScopedVars.length > 0) {
+        iterationEnv = new Environment('for-iteration', env);
+        for (const varName of blockScopedVars) {
+          const currentVal = loopEnv.resolve(varName);
+          iterationEnv.declare(varName, 'let', currentVal);
+        }
+      }
+
       try {
-        yield* executeBlock(stmt.body.body, new Environment('for-body', loopEnv));
+        yield* executeBlock(stmt.body.body, new Environment('for-body', iterationEnv));
       } catch (e) {
         if (e instanceof BreakSignal) break;
         if (e instanceof ContinueSignal) {
           // still execute update
         } else {
           throw e;
+        }
+      }
+
+      // For let/const, copy modified values back to loopEnv for the update expression
+      if (isBlockScoped && blockScopedVars.length > 0) {
+        for (const varName of blockScopedVars) {
+          const updatedVal = iterationEnv.resolve(varName);
+          loopEnv.assign(varName, updatedVal);
         }
       }
 
