@@ -3,12 +3,29 @@
     "title": "JavaScript 엔진 시뮬레이터",
     "description": "단계별 JavaScript 엔진 시각화 도구: Tokenizer → Parser → Interpreter"
   },
+  "simulatorNav": {
+    "title": "시뮬레이터",
+    "menuAriaLabel": "내비게이션 열기",
+    "closeAriaLabel": "내비게이션 닫기",
+    "items": {
+      "engine": {
+        "title": "엔진 시뮬레이터",
+        "description": "Tokenizer → Parser → Interpreter"
+      },
+      "closure": {
+        "title": "클로저 시뮬레이터",
+        "description": "렉시컬 환경 · 스코프 체인"
+      },
+      "event": {
+        "title": "이벤트 전파 시뮬레이터",
+        "description": "Capturing → Target → Bubbling"
+      }
+    }
+  },
   "dashboard": {
     "title": "JavaScript 엔진 시뮬레이터",
     "subtitle": "Tokenizer → Parser → Interpreter · 단계별 시각화 도구",
-    "helpAriaLabel": "도움말",
-    "goToEventSimulator": "이벤트 시뮬레이터",
-    "goToClosureSimulator": "클로저 시뮬레이터"
+    "helpAriaLabel": "도움말"
   },
   "panels": {
     "codeEditor": "코드 편집기",
@@ -107,7 +124,6 @@
   "eventDashboard": {
     "title": "이벤트 전파 시뮬레이터",
     "subtitle": "Capturing → Target → Bubbling · 단계별 시각화 도구",
-    "backToEngine": "← JS 엔진",
     "helpAriaLabel": "도움말",
     "codeSnippet": "JavaScript",
     "htmlStructure": "DOM 프리뷰",
@@ -115,8 +131,7 @@
     "propagationPath": "전파 경로",
     "console": "콘솔",
     "consoleEmpty": "콘솔 출력이 여기에 표시됩니다.",
-    "selectScenarioHint": "시나리오를 선택하여 시작하세요.",
-    "goToClosureSimulator": "클로저 시뮬레이터"
+    "selectScenarioHint": "시나리오를 선택하여 시작하세요."
   },
   "eventControls": {
     "scenario": "시나리오:",
@@ -155,8 +170,6 @@
   "closureDashboard": {
     "title": "클로저 시뮬레이터",
     "subtitle": "렉시컬 환경 · 스코프 체인 · 메모리 생명주기",
-    "backToEngine": "← JS 엔진",
-    "goToEventSimulator": "이벤트 시뮬레이터",
     "helpAriaLabel": "도움말"
   },
   "heapPanel": {

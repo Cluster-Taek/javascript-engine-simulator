@@ -3,12 +3,29 @@
     "title": "JavaScript Engine Simulator",
     "description": "Step-by-step JavaScript engine visualizer: Tokenizer → Parser → Interpreter"
   },
+  "simulatorNav": {
+    "title": "Simulators",
+    "menuAriaLabel": "Open navigation",
+    "closeAriaLabel": "Close navigation",
+    "items": {
+      "engine": {
+        "title": "Engine Simulator",
+        "description": "Tokenizer → Parser → Interpreter"
+      },
+      "closure": {
+        "title": "Closure Simulator",
+        "description": "Lexical Environment · Scope Chain"
+      },
+      "event": {
+        "title": "Event Propagation Simulator",
+        "description": "Capturing → Target → Bubbling"
+      }
+    }
+  },
   "dashboard": {
     "title": "JavaScript Engine Simulator",
     "subtitle": "Tokenizer → Parser → Interpreter · Step-by-Step Visualizer",
-    "helpAriaLabel": "Help",
-    "goToEventSimulator": "Event Simulator",
-    "goToClosureSimulator": "Closure Simulator"
+    "helpAriaLabel": "Help"
   },
   "panels": {
     "codeEditor": "Code Editor",
@@ -107,7 +124,6 @@
   "eventDashboard": {
     "title": "Event Propagation Simulator",
     "subtitle": "Capturing → Target → Bubbling · Step-by-Step Visualizer",
-    "backToEngine": "← JS Engine",
     "helpAriaLabel": "Help",
     "codeSnippet": "JavaScript",
     "htmlStructure": "DOM Preview",
@@ -115,8 +131,7 @@
     "propagationPath": "Propagation Path",
     "console": "Console",
     "consoleEmpty": "Console output will appear here.",
-    "selectScenarioHint": "Select a scenario to begin.",
-    "goToClosureSimulator": "Closure Simulator"
+    "selectScenarioHint": "Select a scenario to begin."
   },
   "eventControls": {
     "scenario": "Scenario:",
@@ -155,8 +170,6 @@
   "closureDashboard": {
     "title": "Closure Simulator",
     "subtitle": "Lexical Environment · Scope Chain · Memory Lifecycle",
-    "backToEngine": "← JS Engine",
-    "goToEventSimulator": "Event Simulator",
     "helpAriaLabel": "Help"
   },
   "heapPanel": {
