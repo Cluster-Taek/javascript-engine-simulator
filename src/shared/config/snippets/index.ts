@@ -373,31 +373,26 @@ console.log("fn2:", fns[2]());
 `,
       },
       {
-        name: 'var Loop Problem',
-        code: `// var is function-scoped, not block-scoped
+        name: 'var vs IIFE vs let',
+        code: `// Problem: var is function-scoped
 // All closures share the SAME "i"
-function createFuncs() {
+function buggy() {
   var funcs = [];
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < 3; i++) {
     funcs.push(function() { return i; });
   }
   return funcs;
 }
 
-var fns = createFuncs();
-// All return 4 (the final value of i)
-console.log("fn0:", fns[0]());
-console.log("fn1:", fns[1]());
-console.log("fn2:", fns[2]());
-console.log("fn3:", fns[3]());
-`,
-      },
-      {
-        name: 'IIFE Fix',
-        code: `// Fix: wrap in IIFE to capture each value
-function createFuncs() {
+var broken = buggy();
+console.log("var0:", broken[0]());
+console.log("var1:", broken[1]());
+console.log("var2:", broken[2]());
+
+// Fix 1: IIFE captures each value
+function iifeFixed() {
   var funcs = [];
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < 3; i++) {
     (function(captured) {
       funcs.push(function() { return captured; });
     })(i);
@@ -405,11 +400,24 @@ function createFuncs() {
   return funcs;
 }
 
-var fns = createFuncs();
-console.log("fn0:", fns[0]());
-console.log("fn1:", fns[1]());
-console.log("fn2:", fns[2]());
-console.log("fn3:", fns[3]());
+var iife = iifeFixed();
+console.log("iife0:", iife[0]());
+console.log("iife1:", iife[1]());
+console.log("iife2:", iife[2]());
+
+// Fix 2: let creates a new scope per iteration
+function letFixed() {
+  let funcs = [];
+  for (let i = 0; i < 3; i++) {
+    funcs.push(function() { return i; });
+  }
+  return funcs;
+}
+
+let good = letFixed();
+console.log("let0:", good[0]());
+console.log("let1:", good[1]());
+console.log("let2:", good[2]());
 `,
       },
     ],

@@ -138,7 +138,7 @@ export function ClosureVisualizationPanel() {
         {/* Main area: Call Stack + Heap Memory */}
         <div className="flex gap-2 flex-1 min-h-0">
           <div className="w-1/3 min-h-0 flex flex-col gap-2">
-            <Panel title={t('callStack')} className="flex-1">
+            <Panel title={t('callStack')} className="h-2/5 shrink-0">
               <CallStackPanel
                 callStack={callStack}
                 onFrameClick={handleFrameClick}
@@ -146,11 +146,9 @@ export function ClosureVisualizationPanel() {
               />
             </Panel>
             {/* Closures below call stack */}
-            {closures.length > 0 && (
-              <Panel title={t('closures')} className="max-h-48 shrink-0">
-                <ClosurePanel closures={closures} />
-              </Panel>
-            )}
+            <Panel title={t('closures')} className="h-3/5 min-h-0">
+              <ClosurePanel closures={closures} />
+            </Panel>
           </div>
           <div className="w-2/3 min-h-0">
             <Panel title={tHeap('title')} className="h-full">
