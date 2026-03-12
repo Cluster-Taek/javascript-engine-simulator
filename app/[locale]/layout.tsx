@@ -1,7 +1,7 @@
 import '../globals.css';
+import { Analytics } from '@vercel/analytics/next';
 import { type Metadata } from 'next';
 import localFont from 'next/font/local';
-import { Analytics } from '@vercel/analytics/next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations } from 'next-intl/server';
 import { CoreProvider } from '@/app';

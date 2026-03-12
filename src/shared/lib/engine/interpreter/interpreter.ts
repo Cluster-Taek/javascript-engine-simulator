@@ -43,7 +43,6 @@ import {
   type ArrayExpression,
   type ObjectExpression,
   type AwaitExpression,
-  type ThisExpression,
 } from '../parser/types';
 
 let stepIdCounter = 0;

@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { useEffect, useRef } from 'react';
 import { useEngineStore } from '@/shared/model';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
