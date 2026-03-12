@@ -86,10 +86,19 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
   const environmentRegistry = new Map<string, Environment>();
   environmentRegistry.set(globalEnv.getId(), globalEnv);
 
+  // Track function call counts for label disambiguation
+  const fnCallCountMap = new Map<string, number>();
+
   function createTrackedEnv(label: string, parent: Environment | null): Environment {
     const env = new Environment(label, parent);
     environmentRegistry.set(env.getId(), env);
     return env;
+  }
+
+  function createFnEnv(name: string, prefix: 'function' | 'new', parent: Environment | null): Environment {
+    const count = (fnCallCountMap.get(name) ?? 0) + 1;
+    fnCallCountMap.set(name, count);
+    return createTrackedEnv(`${prefix}:${name} #${count}`, parent);
   }
 
   // Closure tracking
@@ -745,7 +754,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
           return callee.call(args);
         }
         if (callee.kind === 'function') {
-          const fnEnv = createTrackedEnv(`new:${callee.name}`, callee.closure);
+          const fnEnv = createFnEnv(callee.name, 'new', callee.closure);
           for (let i = 0; i < callee.params.length; i++) {
             fnEnv.declare(callee.params[i], 'let', args[i] ?? { kind: 'undefined' });
           }
@@ -1063,7 +1072,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         thenCallbacks: [],
       };
 
-      const fnEnv = createTrackedEnv(`function:${callee.name}`, callee.closure);
+      const fnEnv = createFnEnv(callee.name, 'function', callee.closure);
       for (let i = 0; i < callee.params.length; i++) {
         fnEnv.declare(callee.params[i], 'let', args[i] ?? { kind: 'undefined' });
       }
@@ -1136,7 +1145,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
     }
 
     // Regular (sync) function handling
-    const fnEnv = createTrackedEnv(`function:${callee.name}`, callee.closure);
+    const fnEnv = createFnEnv(callee.name, 'function', callee.closure);
     for (let i = 0; i < callee.params.length; i++) {
       fnEnv.declare(callee.params[i], 'let', args[i] ?? { kind: 'undefined' });
     }
