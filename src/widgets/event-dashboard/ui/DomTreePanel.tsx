@@ -19,7 +19,7 @@ export function DomTreePanel() {
   const executionStatus = useEventStore((s) => s.executionStatus);
   const triggerEvent = useEventStore((s) => s.triggerEvent);
 
-  const isSimulating = executionStatus === 'running' || (executionStatus === 'paused' && activeNodeId !== null);
+  const _isSimulating = executionStatus === 'running' || (executionStatus === 'paused' && activeNodeId !== null);
 
   const handleNodeClick = useCallback(
     (nodeId: string) => {

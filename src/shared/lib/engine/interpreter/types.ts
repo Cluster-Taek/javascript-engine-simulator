@@ -49,6 +49,7 @@ export interface FunctionValue {
   readonly body: BlockStatement;
   readonly closure: Environment;
   readonly async?: boolean;
+  readonly isArrow?: boolean;
 }
 
 export interface NativeFunctionValue {
@@ -143,6 +144,7 @@ export interface StackFrame {
   readonly id: string;
   readonly name: string;
   readonly loc?: SourceLocation;
+  readonly bodyLoc?: SourceLocation;
   readonly environmentSnapshot: EnvironmentSnapshot;
 }
 

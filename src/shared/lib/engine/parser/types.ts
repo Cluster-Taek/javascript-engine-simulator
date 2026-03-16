@@ -196,6 +196,10 @@ export interface AwaitExpression extends BaseNode {
   readonly argument: Expression;
 }
 
+export interface ThisExpression extends BaseNode {
+  readonly type: 'ThisExpression';
+}
+
 export interface NewExpression extends BaseNode {
   readonly type: 'NewExpression';
   readonly callee: Expression;
@@ -234,6 +238,7 @@ export type Expression =
   | ArrowFunctionExpression
   | NewExpression
   | ConditionalExpression
-  | AwaitExpression;
+  | AwaitExpression
+  | ThisExpression;
 
 export type AstNode = Program | Statement | Expression | VariableDeclarator | ObjectProperty | CatchClause;

@@ -24,7 +24,7 @@ export function DomNodeView({
   isTarget,
   activePhase,
   highlightedListenerId,
-  depth = 0,
+  depth: _depth = 0,
 }: DomNodeViewProps) {
   const isHighlighted = isActive && activePhase;
   const hasActiveListener = node.listeners.some((l) => l.id === highlightedListenerId);

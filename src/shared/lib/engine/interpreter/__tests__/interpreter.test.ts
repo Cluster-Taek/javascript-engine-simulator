@@ -264,4 +264,129 @@ describe('interpreter', () => {
     expect(output[0]).toBe('undefined');
     expect(output[1]).toBe('42');
   });
+
+  // this binding tests
+  it('this binds to object in method call', () => {
+    const { console: output } = run(`
+      let obj = {
+        name: "Alice",
+        greet: function() {
+          return "Hello, " + this.name;
+        }
+      };
+      console.log(obj.greet());
+    `);
+    expect(output[0]).toBe('Hello, Alice');
+  });
+
+  it('this accesses object property in method call', () => {
+    const { console: output } = run(`
+      let obj = {
+        val: 42,
+        getVal: function() {
+          return this.val;
+        }
+      };
+      console.log(obj.getVal());
+    `);
+    expect(output[0]).toBe('42');
+  });
+
+  it('this is undefined for standalone function call', () => {
+    const { console: output } = run(`
+      let obj = {
+        val: 42,
+        getVal: function() {
+          return this.val;
+        }
+      };
+      let fn = obj.getVal;
+      try {
+        fn();
+      } catch (e) {
+        console.log(e);
+      }
+    `);
+    expect(output[0]).toContain('Cannot read properties of undefined');
+  });
+
+  it('new binds this to the constructed object', () => {
+    const { console: output } = run(`
+      function Person(name) {
+        this.name = name;
+        this.hello = function() {
+          return "Hi " + this.name;
+        };
+      }
+      let p = new Person("Bob");
+      console.log(p.name);
+      console.log(p.hello());
+    `);
+    expect(output[0]).toBe('Bob');
+    expect(output[1]).toBe('Hi Bob');
+  });
+
+  it('arrow function inherits this from enclosing scope', () => {
+    const { console: output } = run(`
+      let team = {
+        name: "Dev",
+        show: function() {
+          let getTitle = () => {
+            return "Team: " + this.name;
+          };
+          return getTitle();
+        }
+      };
+      console.log(team.show());
+    `);
+    expect(output[0]).toBe('Team: Dev');
+  });
+
+  it('new returns the constructed object with properties', () => {
+    const { console: output } = run(`
+      function Box(w, h) {
+        this.width = w;
+        this.height = h;
+      }
+      let b = new Box(10, 20);
+      console.log(b.width);
+      console.log(b.height);
+    `);
+    expect(output[0]).toBe('10');
+    expect(output[1]).toBe('20');
+  });
+
+  it('new with arrow function throws TypeError', () => {
+    const { console: output } = run(`
+      let arrow = () => {};
+      try {
+        new arrow();
+      } catch (e) {
+        console.log(e);
+      }
+    `);
+    expect(output[0]).toContain('is not a constructor');
+  });
+
+  it('new returns explicit object-like return value over this', () => {
+    const { console: output } = run(`
+      function ReturnArray() {
+        this.x = 1;
+        return [10, 20];
+      }
+      let a = new ReturnArray();
+      console.log(a[0]);
+      console.log(a[1]);
+
+      function ReturnPrimitive() {
+        this.x = 99;
+        return 42;
+      }
+      let b = new ReturnPrimitive();
+      console.log(b.x);
+    `);
+    expect(output[0]).toBe('10');
+    expect(output[1]).toBe('20');
+    expect(output[2]).toBe('99');
+  });
 });

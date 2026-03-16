@@ -1,5 +1,12 @@
 export { REGEX } from './regex';
-export { DEFAULT_SNIPPETS, CLOSURE_SNIPPETS, DEFAULT_SNIPPET_GROUPS, CLOSURE_SNIPPET_GROUPS } from './snippets';
+export {
+  DEFAULT_SNIPPETS,
+  CLOSURE_SNIPPETS,
+  THIS_SNIPPETS,
+  DEFAULT_SNIPPET_GROUPS,
+  CLOSURE_SNIPPET_GROUPS,
+  THIS_SNIPPET_GROUPS,
+} from './snippets';
 export type { CodeSnippet, SnippetGroup } from './snippets';
 export { EVENT_PRESETS } from './event-presets';
 export { SIMULATORS } from './simulators';

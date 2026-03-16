@@ -1,18 +1,28 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { useEffect, useRef } from 'react';
 import { useEngineStore } from '@/shared/model';
 
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
 
+export interface ExternalDecoration {
+  startLine: number;
+  startCol: number;
+  endLine: number;
+  endCol: number;
+  inlineClassName?: string;
+  className?: string;
+}
+
 interface CodeEditorProps {
   readonly?: boolean;
+  externalDecorations?: ExternalDecoration[];
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function CodeEditor({ readonly = false }: CodeEditorProps) {
+export function CodeEditor({ readonly = false, externalDecorations }: CodeEditorProps) {
   const sourceCode = useEngineStore((s) => s.sourceCode);
   const setSourceCode = useEngineStore((s) => s.setSourceCode);
   const currentLine = useEngineStore((s) => s.currentLine);
@@ -54,12 +64,25 @@ export function CodeEditor({ readonly = false }: CodeEditorProps) {
       });
     }
 
+    // External decorations (e.g., this keyword highlights)
+    if (externalDecorations) {
+      for (const d of externalDecorations) {
+        decorations.push({
+          range: new monaco.Range(d.startLine, d.startCol, d.endLine, d.endCol),
+          options: {
+            ...(d.inlineClassName ? { inlineClassName: d.inlineClassName } : {}),
+            ...(d.className ? { isWholeLine: true, className: d.className } : {}),
+          },
+        });
+      }
+    }
+
     if (decorationsRef.current) {
       decorationsRef.current.set(decorations);
     } else {
       decorationsRef.current = editor.createDecorationsCollection(decorations);
     }
-  }, [currentLine, breakpoints]);
+  }, [currentLine, breakpoints, externalDecorations]);
 
   return (
     <MonacoEditor

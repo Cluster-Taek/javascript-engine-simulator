@@ -34,6 +34,7 @@ import {
   type ArrowFunctionExpression,
   type NewExpression,
   type AwaitExpression,
+  type ThisExpression,
   type SourceLocation,
 } from './types';
 import { ParseError } from '../interpreter/types';
@@ -361,7 +362,7 @@ export function parse(tokens: Token[]): Program {
     }
 
     if (handler === null && finalizer === null) {
-      throw new ParseError("Missing catch or finally after try");
+      throw new ParseError('Missing catch or finally after try');
     }
 
     return {
@@ -726,6 +727,19 @@ export function parse(tokens: Token[]): Program {
       const result: UndefinedLiteral = {
         type: 'UndefinedLiteral',
         loc: { start: { line: tok.line, column: tok.column }, end: { line: tok.line, column: tok.column + 9 } },
+      };
+      return result;
+    }
+
+    // this expression
+    if (tok.type === 'This') {
+      advance();
+      const result: ThisExpression = {
+        type: 'ThisExpression',
+        loc: {
+          start: { line: tok.line, column: tok.column },
+          end: { line: tok.line, column: tok.column + 4 },
+        },
       };
       return result;
     }
