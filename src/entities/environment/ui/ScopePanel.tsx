@@ -1,61 +1,9 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { type EnvironmentSnapshot, type ValueNode } from '@/shared/lib/engine';
-
-// ─── ValueNode tree ────────────────────────────────────────────────────────
-
-interface ValueTreeProps {
-  node: ValueNode;
-  depth?: number;
-}
-
-function ValueTree({ node, depth = 0 }: ValueTreeProps) {
-  const [expanded, setExpanded] = useState(depth < 1);
-  const indent = depth * 12;
-
-  if (node.kind === 'primitive') {
-    return <span className="text-green-300">{node.display}</span>;
-  }
-
-  if (node.kind === 'function') {
-    return <span className="text-purple-300 italic">{node.display}</span>;
-  }
-
-  const children: Array<{ label: string; node: ValueNode }> =
-    node.kind === 'array'
-      ? node.items.map((item, i) => ({ label: `${i}`, node: item }))
-      : node.entries.map(([k, v]) => ({ label: k, node: v }));
-
-  const hasChildren = children.length > 0;
-
-  return (
-    <span className="inline-block w-full">
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          if (hasChildren) setExpanded((v) => !v);
-        }}
-        className="inline-flex items-center gap-1 hover:text-gray-100 transition-colors"
-      >
-        <span className="text-gray-500 w-3 text-center">{hasChildren ? (expanded ? '▼' : '▶') : '·'}</span>
-        <span className="text-cyan-300">{node.display}</span>
-      </button>
-
-      {expanded && hasChildren && (
-        <span className="block">
-          {children.map(({ label, node: child }) => (
-            <span key={label} className="flex items-start gap-1 py-0.5" style={{ paddingLeft: indent + 16 }}>
-              <span className="text-gray-500 shrink-0">{label}:</span>
-              <ValueTree node={child} depth={depth + 1} />
-            </span>
-          ))}
-        </span>
-      )}
-    </span>
-  );
-}
+import { ValueTree } from '@/shared/ui/value-tree';
 
 // ─── Binding row ─────────────────────────────────────────────────────────────
 
@@ -64,17 +12,21 @@ interface BindingRowProps {
   valueNode: ValueNode;
   kind: string;
   initialized: boolean;
+  highlight?: { bg: string; border: string } | null;
 }
 
-function BindingRow({ name, valueNode, kind, initialized }: BindingRowProps) {
+function BindingRow({ name, valueNode, kind, initialized, highlight }: BindingRowProps) {
   const kindColor = kind === 'const' ? 'text-teal-400' : kind === 'let' ? 'text-yellow-400' : 'text-orange-400';
+  const isThisHighlighted = name === 'this' && highlight;
 
   return (
     <div
-      className={`flex items-start gap-2 px-3 py-1 hover:bg-gray-800 rounded text-xs font-mono ${!initialized ? 'opacity-60' : ''}`}
+      className={`flex items-start gap-2 px-3 py-1 rounded text-xs font-mono ${!initialized ? 'opacity-60' : ''} ${
+        isThisHighlighted ? `${highlight.bg} border-l-2 ${highlight.border}` : 'hover:bg-gray-800'
+      }`}
     >
       <span className={`${kindColor} w-10 shrink-0`}>{kind}</span>
-      <span className="text-gray-200 shrink-0">{name}</span>
+      <span className={`shrink-0 ${isThisHighlighted ? 'text-white font-bold' : 'text-gray-200'}`}>{name}</span>
       <span className="text-gray-500 shrink-0">=</span>
       {initialized ? (
         <ValueTree node={valueNode} />
@@ -89,9 +41,10 @@ function BindingRow({ name, valueNode, kind, initialized }: BindingRowProps) {
 
 interface ScopePanelProps {
   environments: readonly EnvironmentSnapshot[];
+  thisHighlight?: { bg: string; border: string } | null;
 }
 
-export function ScopePanel({ environments }: ScopePanelProps) {
+export function ScopePanel({ environments, thisHighlight }: ScopePanelProps) {
   const t = useTranslations('emptyStates');
   const ref = useRef<HTMLDivElement>(null);
 
@@ -120,6 +73,7 @@ export function ScopePanel({ environments }: ScopePanelProps) {
                 valueNode={binding.valueNode}
                 kind={binding.kind}
                 initialized={binding.initialized}
+                highlight={thisHighlight}
               />
             ))
           )}

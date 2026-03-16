@@ -144,6 +144,7 @@ export interface StackFrame {
   readonly id: string;
   readonly name: string;
   readonly loc?: SourceLocation;
+  readonly bodyLoc?: SourceLocation;
   readonly environmentSnapshot: EnvironmentSnapshot;
 }
 

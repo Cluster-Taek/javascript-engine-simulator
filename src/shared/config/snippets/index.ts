@@ -390,6 +390,61 @@ console.log(obj.regularFn());
 console.log(obj.arrowFn());
 `,
       },
+      {
+        name: 'Literal vs Constructor vs Method',
+        code: `// 1. Literal object
+let obj = {
+  name: "obj",
+  regular: function() {
+    return "regular: " + this.name;
+  },
+  arrow: () => {
+    return "arrow: " + this.name;
+  }
+};
+console.log(obj.regular());
+try {
+  console.log(obj.arrow());
+} catch (e) {
+  console.log("arrow error:", e);
+}
+
+// 2. Constructor function
+function Person(name) {
+  this.name = name;
+  this.regular = function() {
+    return "regular: " + this.name;
+  };
+  let self = this;
+  this.arrow = () => {
+    return "arrow: " + self.name;
+  };
+}
+let p = new Person("Alice");
+console.log(p.regular());
+console.log(p.arrow());
+
+// 3. Constructor method inner function
+function Team(name) {
+  this.name = name;
+  this.run = function() {
+    console.log("method: " + this.name);
+    let inner = function() {
+      return this.name;
+    };
+    let innerArrow = () => {
+      return this.name;
+    };
+    try { inner(); } catch(e) {
+      console.log("inner regular: error");
+    }
+    console.log("inner arrow: " + innerArrow());
+  };
+}
+let t = new Team("Dev");
+t.run();
+`,
+      },
     ],
   },
 ];
@@ -560,3 +615,160 @@ console.log(hi("Charlie"));
 ];
 
 export const CLOSURE_SNIPPETS: CodeSnippet[] = CLOSURE_SNIPPET_GROUPS.flatMap((g) => g.snippets);
+
+// ── This Binding snippet groups (this Simulator) ────────────────────
+
+export const THIS_SNIPPET_GROUPS: SnippetGroup[] = [
+  {
+    labelKey: 'thisBasics',
+    snippets: [
+      {
+        name: 'Method Call (this)',
+        code: `let user = {
+  name: "Alice",
+  greet: function() {
+    return "Hello, " + this.name;
+  }
+};
+
+let msg = user.greet();
+console.log(msg);
+`,
+      },
+      {
+        name: 'Constructor (new + this)',
+        code: `function Person(name, age) {
+  this.name = name;
+  this.age = age;
+  this.hello = function() {
+    return this.name + " is " + this.age;
+  };
+}
+
+let alice = new Person("Alice", 25);
+console.log(alice.hello());
+
+let bob = new Person("Bob", 30);
+console.log(bob.hello());
+`,
+      },
+      {
+        name: 'Dynamic this',
+        code: `// Same function, different this
+function introduce() {
+  return "I am " + this.name;
+}
+
+let alice = { name: "Alice", intro: introduce };
+let bob = { name: "Bob", intro: introduce };
+
+// this is decided at call time
+console.log(alice.intro());
+console.log(bob.intro());
+`,
+      },
+    ],
+  },
+  {
+    labelKey: 'thisAdvanced',
+    snippets: [
+      {
+        name: 'Lost this',
+        code: `let counter = {
+  count: 0,
+  increment: function() {
+    this.count++;
+    return this.count;
+  }
+};
+
+// Method call: this = counter
+console.log("method:", counter.increment());
+
+// Extracted: this = undefined
+let fn = counter.increment;
+try {
+  fn();
+} catch (e) {
+  console.log("error:", e);
+}
+`,
+      },
+      {
+        name: 'Arrow vs Regular (this)',
+        code: `let obj = {
+  name: "Alice",
+  // arrow: inherits this from outer scope
+  arrowFn: () => {
+    return "arrow: " + this.name;
+  },
+  // regular: this = obj (caller)
+  regularFn: function() {
+    return "regular: " + this.name;
+  }
+};
+
+console.log(obj.regularFn());
+console.log(obj.arrowFn());
+`,
+      },
+      {
+        name: 'Literal vs Constructor vs Method',
+        code: `// 1. Literal object
+let obj = {
+  name: "obj",
+  regular: function() {
+    return "regular: " + this.name;
+  },
+  arrow: () => {
+    return "arrow: " + this.name;
+  }
+};
+console.log(obj.regular());
+try {
+  console.log(obj.arrow());
+} catch (e) {
+  console.log("arrow error:", e);
+}
+
+// 2. Constructor function
+function Person(name) {
+  this.name = name;
+  this.regular = function() {
+    return "regular: " + this.name;
+  };
+  let self = this;
+  this.arrow = () => {
+    return "arrow: " + self.name;
+  };
+}
+let p = new Person("Alice");
+console.log(p.regular());
+console.log(p.arrow());
+
+// 3. Constructor method inner function
+function Team(name) {
+  this.name = name;
+  this.run = function() {
+    console.log("method: " + this.name);
+    let inner = function() {
+      return this.name;
+    };
+    let innerArrow = () => {
+      return this.name;
+    };
+    try { inner(); } catch(e) {
+      console.log("inner regular: error");
+    }
+    console.log("inner arrow: " + innerArrow());
+  };
+}
+let t = new Team("Dev");
+t.run();
+`,
+      },
+    ],
+  },
+];
+
+export const THIS_SNIPPETS: CodeSnippet[] = THIS_SNIPPET_GROUPS.flatMap((g) => g.snippets);

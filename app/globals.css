@@ -88,3 +88,34 @@ html, body {
   background: rgba(74, 222, 128, 0.18) !important;
   border-left: 3px solid #4ade80 !important;
 }
+
+/* this keyword inline highlight (rule-specific colors) */
+.this-kw-new {
+  background: rgba(168, 85, 247, 0.25);
+  border-bottom: 2px solid #a855f7;
+}
+
+.this-kw-implicit {
+  background: rgba(59, 130, 246, 0.25);
+  border-bottom: 2px solid #3b82f6;
+}
+
+.this-kw-default {
+  background: rgba(107, 114, 128, 0.25);
+  border-bottom: 2px solid #6b7280;
+}
+
+.this-kw-arrow {
+  background: rgba(245, 158, 11, 0.25);
+  border-bottom: 2px solid #f59e0b;
+}
+
+.this-kw-lost {
+  background: rgba(239, 68, 68, 0.25);
+  border-bottom: 2px solid #ef4444;
+}
+
+/* Arrow function inherited scope whole-line highlight */
+.this-inherited-scope {
+  background: rgba(245, 158, 11, 0.08) !important;
+}

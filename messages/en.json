@@ -19,6 +19,10 @@
       "event": {
         "title": "Event Propagation Simulator",
         "description": "Capturing → Target → Bubbling"
+      },
+      "this": {
+        "title": "this Binding Simulator",
+        "description": "new · implicit · default · arrow"
       }
     }
   },
@@ -200,11 +204,62 @@
       "collected": "Collected (gray) — No references, eligible for GC."
     }
   },
+  "thisDashboard": {
+    "title": "this Binding Simulator",
+    "subtitle": "new · implicit · default · arrow · lost",
+    "helpAriaLabel": "Help"
+  },
+  "thisPanel": {
+    "newBinding": "new Binding",
+    "implicit": "Implicit",
+    "default": "Default",
+    "arrow": "Arrow Function",
+    "lost": "Lost Binding",
+    "noThisYet": "No this binding yet.",
+    "idleTitle": "5 Rules of this Binding",
+    "idleNewDesc": "new creates a new object and binds it to this",
+    "idleImplicitDesc": "obj.method() call makes obj the this",
+    "idleDefaultDesc": "Standalone call: this = undefined (strict mode)",
+    "idleArrowDesc": "Arrow function inherits this from outer scope",
+    "idleLostDesc": "Extracting a method loses its this binding",
+    "idleStart": "Press ▶ Run or Step to begin",
+    "callExpression": "Call:",
+    "thisValueLabel": "this =",
+    "line": "line {line}",
+    "returned": "returned",
+    "inheritedFrom": "↑ inherited from {scope}",
+    "explainNew": "new creates a new object and binds it as this",
+    "explainImplicit": "Object {object} before the dot(.) becomes this",
+    "explainDefault": "{name}() called standalone: this = undefined",
+    "explainArrow": "Arrow inherits this from {scope}",
+    "explainLost": "Method extracted from object: this binding lost"
+  },
+  "thisHelp": {
+    "title": "this Binding Simulator — Help",
+    "about": {
+      "heading": "About",
+      "description": "This simulator visualizes how the this keyword is dynamically bound in JavaScript depending on how a function is called."
+    },
+    "rules": {
+      "heading": "5 Binding Rules",
+      "new": "new Binding — When using new, a fresh object is created and bound as this.",
+      "implicit": "Implicit Binding — When calling obj.method(), the object before the dot becomes this.",
+      "default": "Default Binding — When calling a function standalone, this is undefined in strict mode.",
+      "arrow": "Arrow Function — Arrow functions don't have their own this; they inherit from the enclosing scope.",
+      "lost": "Lost Binding — When a method is extracted from its object (e.g., const fn = obj.method), this binding is lost."
+    },
+    "keyInsight": {
+      "heading": "Key Insight",
+      "description": "The same function can have different this values depending on how it is called — this is decided at call time, not definition time."
+    }
+  },
   "snippetGroups": {
     "basics": "Basics",
     "dataAndControl": "Data & Control",
     "asyncEventLoop": "Async / Event Loop",
     "thisBinding": "this Binding",
+    "thisBasics": "Basics",
+    "thisAdvanced": "Advanced",
     "closureBasics": "Basic",
     "loopClosures": "Loop Closures",
     "closureAdvanced": "Advanced"

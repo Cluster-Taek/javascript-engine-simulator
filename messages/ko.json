@@ -19,6 +19,10 @@
       "event": {
         "title": "이벤트 전파 시뮬레이터",
         "description": "Capturing → Target → Bubbling"
+      },
+      "this": {
+        "title": "this 바인딩 시뮬레이터",
+        "description": "new · implicit · default · arrow"
       }
     }
   },
@@ -200,11 +204,62 @@
       "collected": "해제 (회색) — 참조가 없어 GC 대상입니다."
     }
   },
+  "thisDashboard": {
+    "title": "this 바인딩 시뮬레이터",
+    "subtitle": "new · implicit · default · arrow · lost",
+    "helpAriaLabel": "도움말"
+  },
+  "thisPanel": {
+    "newBinding": "new 바인딩",
+    "implicit": "암시적 바인딩",
+    "default": "기본 바인딩",
+    "arrow": "화살표 함수",
+    "lost": "this 유실",
+    "noThisYet": "아직 this 바인딩이 없습니다.",
+    "idleTitle": "this의 5가지 바인딩 규칙",
+    "idleNewDesc": "new가 새 객체를 만들어 this에 바인딩",
+    "idleImplicitDesc": "obj.method() 호출 시 obj가 this",
+    "idleDefaultDesc": "단독 호출 시 this = undefined (strict)",
+    "idleArrowDesc": "화살표 함수는 외부 스코프의 this를 상속",
+    "idleLostDesc": "메서드 추출 시 this 바인딩 유실",
+    "idleStart": "▶ Run 또는 Step을 눌러 시작하세요",
+    "callExpression": "호출:",
+    "thisValueLabel": "this =",
+    "line": "라인 {line}",
+    "returned": "반환됨",
+    "inheritedFrom": "↑ {scope}에서 this 상속",
+    "explainNew": "new가 새 객체를 생성하여 this에 바인딩",
+    "explainImplicit": "점(.) 앞의 객체 {object}가 this가 됨",
+    "explainDefault": "{name}() 단독 호출: this = undefined",
+    "explainArrow": "화살표 함수가 {scope}에서 this를 상속",
+    "explainLost": "메서드가 객체에서 추출됨: this 바인딩 유실"
+  },
+  "thisHelp": {
+    "title": "this 바인딩 시뮬레이터 — 도움말",
+    "about": {
+      "heading": "소개",
+      "description": "이 시뮬레이터는 JavaScript에서 함수 호출 방식에 따라 this 키워드가 동적으로 바인딩되는 과정을 시각화합니다."
+    },
+    "rules": {
+      "heading": "5가지 바인딩 규칙",
+      "new": "new 바인딩 — new를 사용하면 새 객체가 생성되어 this에 바인딩됩니다.",
+      "implicit": "암시적 바인딩 — obj.method()로 호출하면 dot 앞의 객체가 this가 됩니다.",
+      "default": "기본 바인딩 — 함수를 단독 호출하면 strict 모드에서 this는 undefined입니다.",
+      "arrow": "화살표 함수 — 화살표 함수는 자신만의 this가 없으며 외부 스코프에서 상속합니다.",
+      "lost": "this 유실 — 메서드를 객체에서 추출하면 (예: const fn = obj.method) this 바인딩이 유실됩니다."
+    },
+    "keyInsight": {
+      "heading": "핵심 포인트",
+      "description": "같은 함수라도 호출 방식에 따라 this 값이 달라집니다 — this는 정의 시점이 아닌 호출 시점에 결정됩니다."
+    }
+  },
   "snippetGroups": {
     "basics": "기본",
     "dataAndControl": "데이터와 제어",
     "asyncEventLoop": "비동기 / 이벤트 루프",
     "thisBinding": "this 바인딩",
+    "thisBasics": "기본",
+    "thisAdvanced": "고급",
     "closureBasics": "기본",
     "loopClosures": "루프 클로저",
     "closureAdvanced": "고급"

@@ -773,6 +773,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
             id: nextFrameId(),
             name: `new ${callee.name}`,
             loc: expr.loc,
+            bodyLoc: callee.body.loc,
             environmentSnapshot: fnEnv.snapshot(),
           };
           callStack.push(frame);
@@ -1147,6 +1148,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
         id: nextFrameId(),
         name: callee.name,
         loc: expr.loc,
+        bodyLoc: callee.body.loc,
         environmentSnapshot: fnEnv.snapshot(),
       };
       callStack.push(asyncFrame);
@@ -1224,6 +1226,7 @@ export function* interpret(program: Program, globalEnv: Environment): Generator<
       id: nextFrameId(),
       name: callee.name,
       loc: expr.loc,
+      bodyLoc: callee.body.loc,
       environmentSnapshot: fnEnv.snapshot(),
     };
     callStack.push(frame);
