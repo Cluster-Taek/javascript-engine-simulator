@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { FiHelpCircle } from 'react-icons/fi';
 import { LanguageSwitcher } from '@/features/language-switcher';
-import { SimulatorNav } from '@/features/simulator-nav';
+import { SimulatorTabBar } from '@/features/simulator-nav';
 import { ResizableSplit } from '@/shared/ui/resizable-split';
 import { DomTreePanel } from './DomTreePanel';
 import { EventHelpModal } from './EventHelpModal';
@@ -16,9 +16,9 @@ export function EventDashboard() {
 
   return (
     <div className="flex flex-col h-full bg-gray-950">
+      <SimulatorTabBar />
       {/* Header */}
       <header className="flex items-center gap-3 px-4 py-2 bg-gray-900 border-b border-gray-800 shrink-0">
-        <SimulatorNav />
         <div className="flex items-center gap-2">
           <span className="text-lg">🎯</span>
           <h1 className="text-sm font-bold text-gray-100">{t('title')}</h1>
