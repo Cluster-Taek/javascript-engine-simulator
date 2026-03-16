@@ -5,7 +5,7 @@ export interface SimulatorConfig {
 }
 
 export const SIMULATORS: SimulatorConfig[] = [
-  { id: 'engine', href: '/', emoji: '⚙️' },
+  { id: 'engine', href: '/engine-simulator', emoji: '⚙️' },
   { id: 'closure', href: '/closure-simulator', emoji: '🔒' },
   { id: 'this', href: '/this-simulator', emoji: '👆' },
   { id: 'event', href: '/event-simulator', emoji: '🎯' },

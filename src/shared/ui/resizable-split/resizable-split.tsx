@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import { ResizeHandle } from '@/shared/ui/resize-handle';
 
 interface ResizableSplitProps {
   left: React.ReactNode;
@@ -52,10 +53,7 @@ export function ResizableSplit({
       <div style={{ width: `${leftPercent}%` }} className="overflow-hidden">
         {left}
       </div>
-      <div
-        className="w-1 bg-gray-700 hover:bg-blue-500 cursor-col-resize flex-shrink-0 transition-colors"
-        onMouseDown={onMouseDown}
-      />
+      <ResizeHandle direction="vertical" onMouseDown={onMouseDown} />
       <div style={{ width: `${100 - leftPercent}%` }} className="overflow-hidden">
         {right}
       </div>

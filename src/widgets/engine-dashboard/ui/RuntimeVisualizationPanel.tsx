@@ -13,6 +13,7 @@ import { type StackFrame } from '@/shared/lib/engine';
 import { useEngineStore } from '@/shared/model';
 import { ExpandModal } from '@/shared/ui/expand-modal';
 import { Panel } from '@/shared/ui/panel';
+import { ResizeHandle } from '@/shared/ui/resize-handle';
 import { FrameDetailPanel } from './FrameDetailPanel';
 
 export function RuntimeVisualizationPanel() {
@@ -93,7 +94,7 @@ export function RuntimeVisualizationPanel() {
         </div>
 
         {/* Event Loop Indicator */}
-        <div className="shrink-0 bg-gray-800 rounded border border-gray-700">
+        <div className="shrink-0 bg-gray-800 rounded-lg border border-gray-700">
           <EventLoopIndicator phase={eventLoopPhase} />
         </div>
 
@@ -111,11 +112,7 @@ export function RuntimeVisualizationPanel() {
           </div>
         </div>
 
-        {/* Scope resize handle */}
-        <div
-          className="h-1 bg-gray-700 hover:bg-blue-500 cursor-row-resize shrink-0 rounded transition-colors"
-          onMouseDown={onScopeResizeStart}
-        />
+        <ResizeHandle onMouseDown={onScopeResizeStart} />
 
         {/* Scope */}
         <div style={{ height: scopeHeight }} className="shrink-0">

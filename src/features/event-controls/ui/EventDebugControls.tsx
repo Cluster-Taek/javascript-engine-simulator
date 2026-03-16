@@ -36,7 +36,7 @@ export function EventDebugControls() {
   const hasScenario = currentScenario !== null;
 
   return (
-    <div className="flex flex-col gap-2 p-3 bg-gray-800 border-b border-gray-700">
+    <div className="flex flex-col gap-2 p-3 bg-gray-800 border border-gray-700 rounded-lg">
       {/* Scenario selector */}
       <div className="flex items-center gap-2">
         <span className="text-xs text-gray-400">{t('scenario')}</span>

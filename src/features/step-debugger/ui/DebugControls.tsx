@@ -38,7 +38,7 @@ export function DebugControls({ snippetGroups, snippets, defaultSnippet }: Debug
   const canStepBack = stepIndex > 0;
 
   return (
-    <div className="flex flex-col gap-2 p-3 bg-gray-800 border-t border-gray-700">
+    <div className="flex flex-col gap-2 p-3 bg-gray-800 border border-gray-700 rounded-lg">
       {/* Snippet selector */}
       <div className="flex items-center gap-2">
         <span className="text-xs text-gray-400">{t('example')}</span>
