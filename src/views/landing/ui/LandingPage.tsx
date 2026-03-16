@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/features/language-switcher';
 import { Link, SIMULATORS } from '@/shared/config';
+import { Footer } from '@/widgets/footer';
 
 export function LandingPage() {
   const t = useTranslations('simulatorNav');
@@ -32,6 +33,10 @@ export function LandingPage() {
             </Link>
           ))}
         </div>
+      </div>
+
+      <div className="shrink-0">
+        <Footer />
       </div>
     </div>
   );

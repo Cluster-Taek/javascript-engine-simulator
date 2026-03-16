@@ -264,6 +264,12 @@
     "loopClosures": "Loop Closures",
     "closureAdvanced": "Advanced"
   },
+  "landing": {
+    "title": "JavaScript Engine Simulator",
+    "subtitle": "Write JavaScript code and watch it execute step by step",
+    "pipeline": "Source Code → Tokenizer → Parser → Interpreter",
+    "cta": "Choose a simulator"
+  },
   "eventPresets": {
     "basicBubbling": "Basic Bubbling",
     "capturePhase": "Capture Phase",
