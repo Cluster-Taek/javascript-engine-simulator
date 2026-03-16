@@ -65,7 +65,7 @@ export function SimulatorNav() {
 
               <div className="flex-1 overflow-y-auto p-2 flex flex-col gap-1">
                 {SIMULATORS.map((sim) => {
-                  const isActive = pathname === sim.href || (sim.href !== '/' && pathname.startsWith(sim.href));
+                  const isActive = pathname === sim.href || pathname.startsWith(sim.href);
 
                   return (
                     <Link

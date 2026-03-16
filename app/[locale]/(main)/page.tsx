@@ -1,2 +1,1 @@
-// Re-export from FSD views layer
-export { HomePage as default } from '@/views/home';
+export { LandingPage as default } from '@/views/landing';
