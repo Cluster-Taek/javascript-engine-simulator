@@ -9,6 +9,7 @@ import { DebugControls } from '@/features/step-debugger';
 import { DEFAULT_SNIPPETS } from '@/shared/config';
 import { useEngineStore } from '@/shared/model';
 import { Panel } from '@/shared/ui/panel';
+import { ResizeHandle } from '@/shared/ui/resize-handle';
 
 export function CodePanel() {
   const t = useTranslations('panels');
@@ -50,7 +51,7 @@ export function CodePanel() {
   );
 
   return (
-    <div ref={containerRef} className="flex flex-col h-full">
+    <div ref={containerRef} className="flex flex-col h-full gap-2 p-2">
       <div
         data-editor-panel
         className={editorHeight != null ? 'shrink-0' : 'flex-1 min-h-0'}
@@ -61,11 +62,7 @@ export function CodePanel() {
         </Panel>
       </div>
 
-      {/* Editor resize handle */}
-      <div
-        className="h-1 bg-gray-700 hover:bg-blue-500 cursor-row-resize shrink-0 rounded transition-colors"
-        onMouseDown={onResizeStart}
-      />
+      <ResizeHandle onMouseDown={onResizeStart} />
 
       <DebugControls defaultSnippet={DEFAULT_SNIPPETS[0].name} />
       {tokens.length > 0 && (

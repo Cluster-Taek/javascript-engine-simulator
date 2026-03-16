@@ -2,14 +2,19 @@
 
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
+import { type ReactNode } from 'react';
 import { Link, SIMULATORS, usePathname } from '@/shared/config';
 
-export function SimulatorTabBar() {
+interface SimulatorTabBarProps {
+  actions?: ReactNode;
+}
+
+export function SimulatorTabBar({ actions }: SimulatorTabBarProps) {
   const t = useTranslations('simulatorNav');
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-end bg-gray-950 shrink-0 overflow-x-auto">
+    <nav className="flex items-end bg-gray-900 shrink-0 overflow-x-auto">
       {SIMULATORS.map((sim) => {
         const isActive = pathname === sim.href || (sim.href !== '/' && pathname.startsWith(sim.href));
 
@@ -24,7 +29,7 @@ export function SimulatorTabBar() {
             {isActive && (
               <motion.span
                 layoutId="simulator-tab-active"
-                className="absolute inset-0 bg-gray-900 rounded-t-lg border-t border-x border-gray-800"
+                className="absolute inset-0 bg-gray-950 rounded-t-lg border-t border-x border-gray-800"
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
               />
             )}
@@ -33,6 +38,7 @@ export function SimulatorTabBar() {
           </Link>
         );
       })}
+      {actions && <div className="flex items-center gap-2 ml-auto px-3 py-1">{actions}</div>}
     </nav>
   );
 }

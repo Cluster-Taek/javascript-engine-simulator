@@ -29,8 +29,8 @@ export function DomTreePanel() {
   );
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 min-h-0 flex flex-col gap-2 p-2 overflow-auto">
+    <div className="flex flex-col h-full gap-1 p-2">
+      <div className="flex-1 min-h-0 flex flex-col gap-2 overflow-auto">
         {/* Live DOM Preview */}
         <Panel title={t('htmlStructure')} className="flex-1">
           {scenario ? (

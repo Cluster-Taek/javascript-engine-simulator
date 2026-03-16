@@ -18,6 +18,7 @@ import { type StackFrame } from '@/shared/lib/engine';
 import { engineStore, useEngineStore } from '@/shared/model';
 import { ExpandModal } from '@/shared/ui/expand-modal';
 import { Panel } from '@/shared/ui/panel';
+import { ResizeHandle } from '@/shared/ui/resize-handle';
 
 function IdleGuide() {
   const t = useTranslations('thisPanel');
@@ -205,11 +206,7 @@ export function ThisVisualizationPanel() {
           </div>
         </div>
 
-        {/* Scope resize handle */}
-        <div
-          className="h-1 bg-gray-700 hover:bg-blue-500 cursor-row-resize shrink-0 rounded transition-colors"
-          onMouseDown={onScopeResizeStart}
-        />
+        <ResizeHandle onMouseDown={onScopeResizeStart} />
 
         {/* Scope with this highlight */}
         <div style={{ height: scopeHeight }} className="shrink-0">
