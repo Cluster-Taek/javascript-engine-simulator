@@ -9,4 +9,5 @@ export const SIMULATORS: SimulatorConfig[] = [
   { id: 'closure', href: '/closure-simulator', emoji: '🔒' },
   { id: 'this', href: '/this-simulator', emoji: '👆' },
   { id: 'event', href: '/event-simulator', emoji: '🎯' },
+  { id: 'reconciliation', href: '/reconciliation-simulator', emoji: '⚛' },
 ];

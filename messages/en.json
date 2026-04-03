@@ -23,6 +23,10 @@
       "this": {
         "title": "this Binding Simulator",
         "description": "new · implicit · default · arrow"
+      },
+      "reconciliation": {
+        "title": "Reconciliation Simulator",
+        "description": "Virtual DOM · Diffing · Commit"
       }
     }
   },
@@ -269,6 +273,93 @@
     "subtitle": "Write JavaScript code and watch it execute step by step",
     "pipeline": "Source Code → Tokenizer → Parser → Interpreter",
     "cta": "Choose a simulator"
+  },
+  "reconciliationDashboard": {
+    "title": "React Reconciliation Simulator",
+    "subtitle": "Virtual DOM · Diffing · Commit · Step-by-Step Visualizer",
+    "helpAriaLabel": "Help"
+  },
+  "reconciliationPanel": {
+    "codeEditor": "Component Code",
+    "stateInspector": "State Inspector",
+    "console": "Console",
+    "consoleEmpty": "Console output will appear here.",
+    "selectScenarioHint": "Select a scenario to begin.",
+    "oldTree": "Old Virtual DOM",
+    "newTree": "New Virtual DOM",
+    "diffOperations": "Diff Operations",
+    "domPreview": "DOM Preview",
+    "noTree": "No tree to display.",
+    "noDiffOps": "No diff operations yet.",
+    "noDom": "No DOM rendered yet.",
+    "children": "children",
+    "currentState": "Current State",
+    "stateTransitions": "State Transitions",
+    "idleTitle": "React Reconciliation Algorithm",
+    "idleStep1Title": "Render",
+    "idleStep1Desc": "Call render function to build a new Virtual DOM tree from updated state.",
+    "idleStep2Title": "Diff",
+    "idleStep2Desc": "Compare old and new trees node-by-node to find minimal changes.",
+    "idleStep3Title": "Key Matching",
+    "idleStep3Desc": "Use key props to efficiently track list items across re-renders.",
+    "idleStep4Title": "Commit",
+    "idleStep4Desc": "Apply only the necessary DOM mutations (insert, update, delete).",
+    "idleStart": "Select a scenario and trigger a state change to begin."
+  },
+  "reconciliationControls": {
+    "scenario": "Scenario:",
+    "selectScenario": "Select scenario...",
+    "pause": "⏸ Pause",
+    "run": "▶ Run",
+    "stepBack": "Back",
+    "step": "Step",
+    "reset": "Reset",
+    "speed": "Speed:",
+    "msPerStep": "ms/step"
+  },
+  "reconciliationHelp": {
+    "title": "React Reconciliation Simulator — Help",
+    "about": {
+      "heading": "About",
+      "description": "This simulator visualizes how React's reconciliation algorithm compares Virtual DOM trees and computes the minimal set of DOM operations needed to update the UI."
+    },
+    "algorithm": {
+      "heading": "Algorithm Steps",
+      "step1": "Render — When state changes, React calls the render function to produce a new Virtual DOM tree.",
+      "step2": "Diff — React compares the old and new trees. Same-type elements get prop updates; different types replace the entire subtree.",
+      "step3": "Key Matching — For lists, React uses key props to match old and new items efficiently, avoiding unnecessary re-creation.",
+      "step4": "Commit — React applies only the necessary DOM mutations (insertions, updates, deletions) in a single batch."
+    },
+    "operations": {
+      "heading": "DOM Operations",
+      "placement": "A new node is inserted into the DOM.",
+      "update": "An existing node's props or text content are updated.",
+      "deletion": "A node is removed from the DOM."
+    },
+    "keyInsight": {
+      "heading": "Key Insight",
+      "description": "React's reconciliation is O(n) because it compares nodes level-by-level and uses keys for list items. Without keys, React falls back to index-based comparison which can cause unnecessary re-renders."
+    }
+  },
+  "reconciliationScenarios": {
+    "counter": "Counter",
+    "counterInc": "Increment +1",
+    "counterJump": "Jump to 5",
+    "toggle": "Toggle Visibility",
+    "toggleHide": "Hide content",
+    "toggleShow": "Show content",
+    "todoKeyed": "Todo List (with keys)",
+    "todoRemove": "Remove item",
+    "todoAdd": "Add & reorder",
+    "todoUnkeyed": "Todo List (no keys)",
+    "todoUnkeyedRemove": "Remove item",
+    "todoUnkeyedPrepend": "Prepend item",
+    "nested": "Nested Components",
+    "nestedDark": "Switch to dark",
+    "nestedLight": "Switch to light",
+    "classToggle": "Class Toggle",
+    "classActivate": "Activate",
+    "classDeactivate": "Deactivate"
   },
   "eventPresets": {
     "basicBubbling": "Basic Bubbling",

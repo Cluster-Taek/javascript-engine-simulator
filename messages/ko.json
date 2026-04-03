@@ -23,6 +23,10 @@
       "this": {
         "title": "this 바인딩 시뮬레이터",
         "description": "new · implicit · default · arrow"
+      },
+      "reconciliation": {
+        "title": "재조정 시뮬레이터",
+        "description": "Virtual DOM · Diffing · Commit"
       }
     }
   },
@@ -269,6 +273,93 @@
     "subtitle": "JavaScript 코드를 작성하고 단계별 실행 과정을 확인하세요",
     "pipeline": "Source Code → Tokenizer → Parser → Interpreter",
     "cta": "시뮬레이터 선택"
+  },
+  "reconciliationDashboard": {
+    "title": "React 재조정 시뮬레이터",
+    "subtitle": "Virtual DOM · Diffing · Commit · 단계별 시각화 도구",
+    "helpAriaLabel": "도움말"
+  },
+  "reconciliationPanel": {
+    "codeEditor": "컴포넌트 코드",
+    "stateInspector": "상태 인스펙터",
+    "console": "콘솔",
+    "consoleEmpty": "콘솔 출력이 여기에 표시됩니다.",
+    "selectScenarioHint": "시나리오를 선택하여 시작하세요.",
+    "oldTree": "이전 Virtual DOM",
+    "newTree": "새 Virtual DOM",
+    "diffOperations": "Diff 연산",
+    "domPreview": "DOM 프리뷰",
+    "noTree": "표시할 트리가 없습니다.",
+    "noDiffOps": "아직 diff 연산이 없습니다.",
+    "noDom": "렌더링된 DOM이 없습니다.",
+    "children": "자식",
+    "currentState": "현재 상태",
+    "stateTransitions": "상태 전환",
+    "idleTitle": "React 재조정 알고리즘",
+    "idleStep1Title": "렌더",
+    "idleStep1Desc": "변경된 상태로 렌더 함수를 호출하여 새 Virtual DOM 트리를 생성합니다.",
+    "idleStep2Title": "비교",
+    "idleStep2Desc": "이전 트리와 새 트리를 노드별로 비교하여 최소 변경사항을 찾습니다.",
+    "idleStep3Title": "Key 매칭",
+    "idleStep3Desc": "key prop을 사용하여 리스트 항목을 효율적으로 추적합니다.",
+    "idleStep4Title": "커밋",
+    "idleStep4Desc": "필요한 DOM 변경사항만 적용합니다 (삽입, 업데이트, 삭제).",
+    "idleStart": "시나리오를 선택하고 상태 변경을 트리거하세요."
+  },
+  "reconciliationControls": {
+    "scenario": "시나리오:",
+    "selectScenario": "시나리오 선택...",
+    "pause": "⏸ 일시정지",
+    "run": "▶ 실행",
+    "stepBack": "뒤로",
+    "step": "스텝",
+    "reset": "초기화",
+    "speed": "속도:",
+    "msPerStep": "ms/스텝"
+  },
+  "reconciliationHelp": {
+    "title": "React 재조정 시뮬레이터 — 도움말",
+    "about": {
+      "heading": "소개",
+      "description": "이 시뮬레이터는 React의 재조정 알고리즘이 Virtual DOM 트리를 비교하고 UI 업데이트에 필요한 최소한의 DOM 연산을 계산하는 과정을 시각화합니다."
+    },
+    "algorithm": {
+      "heading": "알고리즘 단계",
+      "step1": "렌더 — 상태가 변경되면 React는 렌더 함수를 호출하여 새 Virtual DOM 트리를 생성합니다.",
+      "step2": "비교 — React는 이전 트리와 새 트리를 비교합니다. 같은 타입이면 props를 업데이트하고, 다른 타입이면 서브트리 전체를 교체합니다.",
+      "step3": "Key 매칭 — 리스트에서 React는 key prop을 사용하여 이전과 새 항목을 효율적으로 매칭하여 불필요한 재생성을 방지합니다.",
+      "step4": "커밋 — React는 필요한 DOM 변경사항(삽입, 업데이트, 삭제)만 한 번에 적용합니다."
+    },
+    "operations": {
+      "heading": "DOM 연산",
+      "placement": "새 노드가 DOM에 삽입됩니다.",
+      "update": "기존 노드의 props 또는 텍스트가 업데이트됩니다.",
+      "deletion": "노드가 DOM에서 제거됩니다."
+    },
+    "keyInsight": {
+      "heading": "핵심 포인트",
+      "description": "React의 재조정은 레벨별 비교와 리스트의 key 사용으로 O(n) 시간복잡도입니다. key가 없으면 인덱스 기반 비교로 대체되어 불필요한 리렌더링이 발생할 수 있습니다."
+    }
+  },
+  "reconciliationScenarios": {
+    "counter": "카운터",
+    "counterInc": "+1 증가",
+    "counterJump": "5로 점프",
+    "toggle": "토글 표시",
+    "toggleHide": "컨텐츠 숨기기",
+    "toggleShow": "컨텐츠 보이기",
+    "todoKeyed": "할 일 목록 (key 사용)",
+    "todoRemove": "항목 제거",
+    "todoAdd": "추가 및 재정렬",
+    "todoUnkeyed": "할 일 목록 (key 없음)",
+    "todoUnkeyedRemove": "항목 제거",
+    "todoUnkeyedPrepend": "맨 앞에 추가",
+    "nested": "중첩 컴포넌트",
+    "nestedDark": "다크 전환",
+    "nestedLight": "라이트 전환",
+    "classToggle": "클래스 토글",
+    "classActivate": "활성화",
+    "classDeactivate": "비활성화"
   },
   "eventPresets": {
     "basicBubbling": "기본 버블링",
